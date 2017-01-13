@@ -2,11 +2,12 @@ import numpy as np
 from board import Board, Action
 
 def test_action():
-    shape = (2, 2)
+    shape = (2, 3)
     board = Board(shape)
     board.grid = np.array([
         [[0, 0, 1], [0, 0, 0]],
         [[0, 0, 0], [0, 0, 0]],
+        [[0, 0, 0], [0, 0, 2]],
     ], dtype=np.int32)
 
     from_case = (0, 0)
@@ -14,6 +15,9 @@ def test_action():
 
     a = Action(from_case, to_case, 1, 'V')
     assert a.is_valid(board) is True
+
+    b = Action(from_case, (from_case[0] + 2, from_case[1]), 1, 'H')  # to_case is too far
+    assert b.is_valid(board) is False
 
     b = Action(from_case, to_case, 1, 'H')  # human
     assert b.is_valid(board) is False
@@ -26,6 +30,9 @@ def test_action():
 
     b = Action(shape, (shape[0] - 1, shape[1] - 1), 1, 'V')  # out of board case
     assert b.is_valid(board) is False
+
+    a = Action(from_case, to_case, 1, 'V')  # to_case is from_case of another action
+    assert a.is_valid(board, actions=[Action(to_case, to_case, 1, 'V')]) is False
 
     assert Action.square_on_grid(shape, board.grid) is False
 

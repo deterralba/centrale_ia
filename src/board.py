@@ -36,7 +36,7 @@ class Action:
             0 <= square[1] < grid.shape[1],
         ])
 
-    def is_valid(self, board):
+    def is_valid(self, board, actions=None):
         dif_x = abs(self._from[0] - self._to[0])
         dif_y = abs(self._from[1] - self._to[1])
         return all([
@@ -46,6 +46,7 @@ class Action:
             self._race != 'H',
             Action.square_on_grid(self._to, board.grid),
             Action.square_on_grid(self._from, board.grid) and 0 < self._number <= board.grid[self._from][RACE_ID[self._race]],
+            not actions or self._to not in [ac._from for ac in actions]
         ])
 
 if __name__ == '__main__':
