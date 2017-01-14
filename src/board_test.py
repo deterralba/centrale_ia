@@ -34,5 +34,5 @@ def test_action():
     a = Action(from_case, to_case, 1, 'V')  # to_case is from_case of another action
     assert a.is_valid(board, actions=[Action(to_case, to_case, 1, 'V')]) is False
 
-    assert Action.square_on_grid(shape, board.grid) is False
+    assert Action.square_is_on_grid(shape, board.grid) is False
 
