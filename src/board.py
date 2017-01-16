@@ -8,7 +8,7 @@ RACE_ID = {
 
 class Board:
     def __init__(self, dimensions):
-        # line, columne, race(humans, loup-garous, vampires)
+        # line, column, race(humans, loup-garous, vampires)
         self.grid = np.zeros(dimensions, dtype=np.int32)
         self.currentPlayer = 0
 
@@ -16,8 +16,8 @@ class Board:
         return None
 
     def play_actions(self, actions):
-        '''fonction qui prend en entrée la grille + la square de départ + la square cible
-         + le nombre de personnes à bouger et qui retourne la nouvelle grille'''
+        '''fonction qui prend en entree la grille + la square de depart + la square cible
+         + le nombre de personnes a bouger et qui retourne la nouvelle grille'''
          # actions need to be grouped by their destination, so that several groups can attak the same square
         return None
 
@@ -31,8 +31,8 @@ class Action:
     @staticmethod
     def square_is_on_grid(square, grid):
         return all([
-            0 <= square[0] < grid.shape[0],
-            0 <= square[1] < grid.shape[1],
+            0 <= square[0] < grid.shape[0], # line played <= number of lines
+            0 <= square[1] < grid.shape[1], # column played <= number of columns
         ])
 
     def is_valid(self, board, actions=None):
@@ -50,10 +50,12 @@ class Action:
         ])
 
 if __name__ == '__main__':
-    b = Board((2, 2))
+    b = Board((2, 3)) # 2 lines & 3 columns
     b.grid = np.array([
-        [[1, 2, 3], [3, 4, 6]],
-        [[5, 9, 5], [2, 1, 1]]
+        [[1, 2, 3], [3, 4, 6], [2, 7, 0]],
+        [[5, 9, 5], [2, 1, 1], [4, 2, 1]]
     ], dtype=np.int32)
+    print(b.grid)
+    print(b.grid.shape)
 
 

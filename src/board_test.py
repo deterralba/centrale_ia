@@ -2,7 +2,7 @@ import numpy as np
 from board import Board, Action
 
 def test_action():
-    shape = (2, 3)
+    shape = (3, 2) # 3 lines & 2 columns
     board = Board(shape)
     board.grid = np.array([
         [[0, 0, 1], [0, 0, 0]],
