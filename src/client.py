@@ -9,11 +9,11 @@ class ComServer:
 
     def connect_with_server(self):
         self.connexion.connect((self.host, self.port))
-        print("Connexion établie avec le serveur sur le port {}".format(self.port))
+        print('Opened connection with {} on {}'.format(self.host, self.port))
 
     def close_connexion(self):
         self.connexion.close()
-        print('Closed connexion with server')
+        print('Closed connection with server')
 
     def send_name(self, name):
         self.connexion.send('NME'.encode('ascii'))
