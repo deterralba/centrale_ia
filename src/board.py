@@ -1,3 +1,4 @@
+from math import random
 import numpy as np
 from draw import start_GUI
 
@@ -39,8 +40,22 @@ class Board:
     def do_actions(self, actions):
         for action in actions:
             self.moves(action)
-        self.resolve_grid(self)
+        line, column = self.grid.shape
+        for square in [(i, j) for i in range(line) for j in range(column)]:
+            self.resolve_square(square)
 
+    def resolve_square(self, square):
+        nb_zeros = self.grid[square].count(0)
+        if nb_zeros >= 2:
+            return
+        elif nb_zeros == 0:
+            raise ValueError('impossible to resolve 3 races on one square')
+        elif nb_zeros == 1:
+            if square[RACE_ID['hum']] > 0:
+                result = attack_humans(self.currentPlayer, self.grid[square])
+            else:
+                result = attack_monsters(self.currentPlayer, self.grid[square])
+            self.grid[square] = result
 
 class Action:
     def __init__(self, from_square, to_square, number, race):
@@ -71,6 +86,53 @@ class Action:
             not actions or self.to not in [ac._from for ac in actions]
         ])
 
+def attack_humans(attacker, square, probabilistic=False):
+    units = square[RACE_ID[attacker]]
+    enemies = square[RACE_ID['hum']]
+    if units/enemies >= 1:
+        units += enemies
+        enemies = 0
+    else:
+        p = units / (2 * enemies)
+        draw = random()
+        if draw > p:
+            units = 0
+            enemies = int(enemies * (1-p))
+        else:
+            units += enemies
+            units = int(p*units)
+            enemies = 0
+    res = [0, 0, 0]
+    res[RACE_ID[attacker]] = units
+    res[RACE_ID['hum']] = enemies
+    return res
+
+def attack_monsters(attacker, square, probabilistic=False):
+    units = square[RACE_ID[attacker]]
+    enemy_race = 'wolv' if attacker == 'vamp' else 'vamp'
+    enemies = square[RACE_ID[enemy_race]]
+    if units/enemies >= 1.5:
+        enemies = 0
+    else:
+        #si victoire (proba p) : chaque attaquant a une proba (p) de survivre
+        #                        chaque humain a une proba (p) de devenir allié
+        #si défaite (1-p) : aucun survivant coté attaquant
+        #                   chaque humain a une proba (1-p) de survivre
+        if units >= enemies:
+            p = units / enemies - 0.5
+        else:
+            p = units / (2 * enemies)
+        draw = random()
+        if draw > p:  # defeat of attacker
+            units = 0
+            enemies = int(enemies * (1-p))
+        else:
+            units = int(p*units)
+            enemies = 0
+    res = [0, 0, 0]
+    res[RACE_ID[attacker]] = units
+    res[RACE_ID[enemy_race]] = enemies
+    return res
 if __name__ == '__main__':
 
     initial_pop = [{'x': 0, 'y': 0, 'hum': 0, 'vamp': 4, 'wolv': 0},
