@@ -1,12 +1,7 @@
-from random import random, randint
+from random import random
 import numpy as np
 from draw import start_GUI, draw
-
-RACE_ID = {
-    'hum': 0,
-    'vamp': 1,
-    'wolv': 2,
-}
+from const import RACE_ID, HUM, WOLV, VAMP
 
 SKIP_CHECKS = False
 
@@ -28,20 +23,20 @@ class Board:
         nb_w = 0
         nb_v = 0
         for square in self.enumerate_squares():
-            nb_v += self.grid[square][RACE_ID['vamp']]
-            nb_w += self.grid[square][RACE_ID['wolv']]
+            nb_v += self.grid[square][RACE_ID[VAMP]]
+            nb_w += self.grid[square][RACE_ID[WOLV]]
             if nb_w and nb_v:
                 return False
-        return 'vamp'*(bool(nb_v)) + 'wolv'*(bool(nb_w)) or 'hum'
+        return VAMP*(bool(nb_v)) + WOLV*(bool(nb_w)) or HUM
 
     def update_grid(self, changed_squares):
         for square in changed_squares:
             x = square['x']
             y = square['y']
             # x, y server representation is not equal to our line column matrix model
-            self.grid[y, x, RACE_ID['hum']] = square['hum']
-            self.grid[y, x, RACE_ID['vamp']] = square['vamp']
-            self.grid[y, x, RACE_ID['wolv']] = square['wolv']
+            self.grid[y, x, RACE_ID[HUM]] = square[HUM]
+            self.grid[y, x, RACE_ID[VAMP]] = square[VAMP]
+            self.grid[y, x, RACE_ID[WOLV]] = square[WOLV]
 
     def moves(self, action):
         ''' Moves the units, do not resolve any fight'''
@@ -49,11 +44,9 @@ class Board:
             self.grid[action._from][RACE_ID[action.race]] -= action.number
             self.grid[action.to][RACE_ID[action.race]] += action.number
         else:
-            print(action)
-            raise ActionInvalidError('action not valid')
+            raise ActionInvalidError('action not valid: {}'.format(action))
 
     def do_actions(self, actions):
-        print(actions)
         for action in actions:
             self.moves(action)
         for square in self.enumerate_squares():
@@ -66,8 +59,7 @@ class Board:
         elif nb_zeros == 0:
             raise ValueError('impossible to resolve 3 races on one square')
         elif nb_zeros == 1:
-            if self.grid[square][RACE_ID['hum']] > 0:
-                print(square, RACE_ID['hum'])
+            if self.grid[square][RACE_ID[HUM]] > 0:
                 result = attack_humans(self.currentPlayer, self.grid[square])
             else:
                 result = attack_monsters(self.currentPlayer, self.grid[square])
@@ -79,7 +71,7 @@ class Action:
         self.to = to_square
         self.number = number
         self.race = race
-        self.race_ennemi = 'wolv' if self.race == 'vamp' else 'vamp'
+        self.race_ennemi = WOLV if self.race == VAMP else VAMP
 
     def __repr__(self):
         return '{} {} {} {}'.format(self._from, self.to, self.number, self.race)
@@ -98,7 +90,7 @@ class Action:
             dif_x <= 1,
             dif_y <= 1,
             self._from != self.to,
-            self.race in ['vamp', 'wolv'],
+            self.race in [VAMP, WOLV],
             Action.square_is_on_grid(self.to, board.grid),
             Action.square_is_on_grid(self._from, board.grid) and \
                 0 < self.number <= board.grid[self._from][RACE_ID[self.race]],
@@ -106,9 +98,8 @@ class Action:
         ])
 
 def attack_humans(attacker, square, probabilistic=False):
-    print(square)
     units = square[RACE_ID[attacker]]
-    enemies = square[RACE_ID['hum']]
+    enemies = square[RACE_ID[HUM]]
     if units/enemies >= 1:
         units += enemies
         enemies = 0
@@ -124,13 +115,12 @@ def attack_humans(attacker, square, probabilistic=False):
             enemies = 0
     res = [0, 0, 0]
     res[RACE_ID[attacker]] = units
-    res[RACE_ID['hum']] = enemies
+    res[RACE_ID[HUM]] = enemies
     return res
 
 def attack_monsters(attacker, square, probabilistic=False):
-    print(square)
     units = square[RACE_ID[attacker]]
-    enemy_race = 'wolv' if attacker == 'vamp' else 'vamp'
+    enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
     print('Enemies : {} {}'.format(enemy_race, enemies))
     if units/enemies >= 1.5:
@@ -155,71 +145,4 @@ def attack_monsters(attacker, square, probabilistic=False):
     res[RACE_ID[attacker]] = units
     res[RACE_ID[enemy_race]] = enemies
     return res
-
-def get_random_adjacent_square(grid, square):
-    not_on_grid = True
-    to = None
-    while not_on_grid or to == square:
-        to = (square[0] + randint(-1, 1), square[1] + randint(-1, 1))
-        not_on_grid = not Action.square_is_on_grid(to, grid)
-    return to
-
-class Player:
-    def __init__(self, race):
-        self.race = race
-        print(race)
-
-    def get_next_move(self, board):
-        raise NotImplementedError()
-
-class RamdomPlayer(Player):
-    def get_next_move(self, board):
-        actions = []
-        for square in board.enumerate_squares():
-            units = board.grid[square][RACE_ID[self.race]]
-            if units > 0:
-                print(square)
-                to = get_random_adjacent_square(board.grid, square)
-                print(Action(square, to, units, self.race))
-                return [Action(square, to, units, self.race)]
-                #actions.append(Action(square, to, square[RACE_ID[self.race]], self.race))
-                #print(actions[-1])
-        print(actions)
-        return actions
-
-def play(*args):
-    global p1, p2, b
-    p = p1
-    game_over = False
-    while not game_over:
-        b.currentPlayer = p.race
-        actions = p.get_next_move(b)
-        print(actions)
-        b.do_actions(actions)
-        draw(b.grid)
-        from time import sleep
-        sleep(0.3)
-        p = p2 if p == p1 else p1
-        game_over = b.is_over()
-    print(b.is_over() + 'won !')
-
-if __name__ == '__main__':
-
-    initial_pop = [{'x': 0, 'y': 0, 'hum': 0, 'vamp': 4, 'wolv': 0},
-                   {'x': 1, 'y': 3, 'hum': 5, 'vamp': 0, 'wolv': 0},
-                   {'x': 3, 'y': 1, 'hum': 3, 'vamp': 0, 'wolv': 0},
-                   {'x': 4, 'y': 3, 'hum': 0, 'vamp': 0, 'wolv': 3}]
-
-    global p1, p2, b
-    b = Board((4,5), initial_pop)
-    p1 = RamdomPlayer('vamp')
-    p2 = RamdomPlayer('wolv')
-    start_GUI(b.grid, play)
-
-    #a1 = Action((0,0), (0,1), 1, 'wolv')
-    #a2 = Action((1,1), (1, 0), 2, 'wolv')
-    #a3 = Action((1,1), (0,1), 2, 'wolv')
-    #actions = [a1, a2]
-
-    #print(b2.board_modification(actions))
 
