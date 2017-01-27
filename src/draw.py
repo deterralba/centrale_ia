@@ -66,7 +66,7 @@ def start_GUI(board, start):
 
     root.mainloop()
 
-    
-    
-    
-    
+
+
+
+

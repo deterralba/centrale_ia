@@ -1,4 +1,4 @@
-from math import random
+from random import random, randint
 import numpy as np
 from draw import start_GUI
 
@@ -20,6 +20,20 @@ class Board:
         self.update_grid(initial_pop)
         self.currentPlayer = None
 
+    def enumerate_squares(self):
+        line, column, _ = self.grid.shape
+        return [(i, j) for i in range(line) for j in range(column)]
+
+    def is_over(self):
+        nb_w = 0
+        nb_v = 0
+        for square in self.enumerate_squares():
+            nb_v += self.grid[square][RACE_ID['vamp']]
+            nb_w += self.grid[square][RACE_ID['wolv']]
+            if nb_w and nb_v:
+                return False
+        return True
+
     def update_grid(self, changed_squares):
         for square in changed_squares:
             x = square['x']
@@ -35,17 +49,18 @@ class Board:
             self.grid[action._from][RACE_ID[action.race]] -= action.number
             self.grid[action.to][RACE_ID[action.race]] += action.number
         else:
+            print(action)
             raise ActionInvalidError('action not valid')
 
     def do_actions(self, actions):
+        print(actions)
         for action in actions:
             self.moves(action)
-        line, column = self.grid.shape
-        for square in [(i, j) for i in range(line) for j in range(column)]:
+        for square in self.enumerate_squares():
             self.resolve_square(square)
 
     def resolve_square(self, square):
-        nb_zeros = self.grid[square].count(0)
+        nb_zeros = list(self.grid[square]).count(0)
         if nb_zeros >= 2:
             return
         elif nb_zeros == 0:
@@ -65,6 +80,9 @@ class Action:
         self.race = race
         self.race_ennemi = 'wolv' if self.race == 'vamp' else 'vamp'
 
+    def __repr__(self):
+        return '{} {} {} {}'.format(self._from, self.to, self.number, self.race)
+
     @staticmethod
     def square_is_on_grid(square, grid):
         return all([
@@ -79,7 +97,7 @@ class Action:
             dif_x <= 1,
             dif_y <= 1,
             self._from != self.to,
-            self.race in 'LV',
+            self.race in ['vamp', 'wolv'],
             Action.square_is_on_grid(self.to, board.grid),
             Action.square_is_on_grid(self._from, board.grid) and \
                 0 < self.number <= board.grid[self._from][RACE_ID[self.race]],
@@ -133,6 +151,48 @@ def attack_monsters(attacker, square, probabilistic=False):
     res[RACE_ID[attacker]] = units
     res[RACE_ID[enemy_race]] = enemies
     return res
+
+def get_random_adjacent_square(grid, square):
+    not_on_grid = True
+    while not_on_grid or to == square:
+        to = (square[0] + randint(-1, 1), square[1] + randint(-1, 1))
+        not_on_grid = not Action.square_is_on_grid(to, grid)
+    return to
+
+class Player:
+    def __init__(self, race):
+        self.race = race
+
+    def get_next_move(self, board):
+        raise NotImplementedError()
+
+class RamdomPlayer(Player):
+    def get_next_move(self, board):
+        actions = []
+        for square in board.enumerate_squares():
+            units = board.grid[square][RACE_ID[self.race]]
+            if units > 0:
+                print(square)
+                to = get_random_adjacent_square(board.grid, square)
+                print(Action(square, to, units, self.race))
+                return [Action(square, to, units, self.race)]
+                #actions.append(Action(square, to, square[RACE_ID[self.race]], self.race))
+                #print(actions[-1])
+        print(actions)
+        return actions
+
+def play(*args):
+    global p1, p2, b
+    p = p1
+    game_over = False
+    while not game_over:
+        actions = p.get_next_move(b)
+        print(actions)
+        b.do_actions(actions)
+        print(b.grid)
+        p = p2 if p == p1 else p1
+        game_over = b.is_over()
+
 if __name__ == '__main__':
 
     initial_pop = [{'x': 0, 'y': 0, 'hum': 0, 'vamp': 4, 'wolv': 0},
@@ -140,9 +200,11 @@ if __name__ == '__main__':
                    {'x': 3, 'y': 1, 'hum': 3, 'vamp': 0, 'wolv': 0},
                    {'x': 4, 'y': 3, 'hum': 0, 'vamp': 0, 'wolv': 3}]
 
-    test_board = Board((4,5), initial_pop)
-
-    start_GUI(test_board.grid, lambda x=None: None)
+    global p1, p2, b
+    b = Board((4,5), initial_pop)
+    p1 = RamdomPlayer('vamp')
+    p2 = RamdomPlayer('wolv')
+    start_GUI(b.grid, play)
 
     #a1 = Action((0,0), (0,1), 1, 'wolv')
     #a2 = Action((1,1), (1, 0), 2, 'wolv')
