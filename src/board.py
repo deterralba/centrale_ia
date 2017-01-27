@@ -1,17 +1,32 @@
 import numpy as np
+from draw import *
 
 RACE_ID = {
     'H': 0,
-    'L': 1,
-    'V': 2,
+    'V': 1,
+    'L': 2,
 }
 
 
 class Board:
-    def __init__(self, dimensions):
-        # line, column, race(humans, loup-garous, vampires)
-        self.grid = np.zeros(dimensions, dtype=np.int32)
-        self.currentPlayer = 0
+    def __init__(self, dimensions, initial_pop):
+        shape = (dimensions[0], dimensions[1], 3)
+        self.grid = np.zeros(shape, dtype=np.int32)
+        self.update_grid(initial_pop)
+        #self.currentPlayer = 0
+
+    def update_grid(self, changed_squares):
+        for square in changed_squares:
+            x = square['x']
+            y = square['y']
+            hum = square['hum']
+            vamp = square['vamp']
+            wolv = square['wolv']
+            self.grid[y,x,RACE_ID['H']] = hum
+            self.grid[y,x,RACE_ID['V']] = vamp
+            self.grid[y,x,RACE_ID['L']] = wolv
+        #return self.grid?
+            
 
     def board_modification(self, actions):
         # actions need to be grouped by their destination, so that several groups can attack the same square
@@ -91,27 +106,20 @@ class Action:
         ])
 
 if __name__ == '__main__':
-    # b1 = Board((2, 3)) # 2 lines & 3 columns
-    # b1.grid = np.array([
-    #     [[1, 2, 3], [3, 4, 6], [2, 7, 0]],
-    #     [[5, 9, 5], [2, 1, 1], [4, 2, 1]]
-    # ], dtype=np.int32)
-    # print(b1.grid)
-    # print(b1.grid[0, 0, RACE_ID['H']])
-    # print(b1.grid[0][0][RACE_ID['H']])
-    # print(RACE_ID['V'])
-    # print(b1.grid.shape)
 
-    b2 = Board((2, 3))  # 2 lines & 3 columns
-    b2.grid = np.array([
-        [[0, 2, 0], [0, 0, 0], [0, 0, 0]],
-        [[0, 0, 0], [0, 4, 0], [0, 0, 0]]
-    ], dtype=np.int32)
-    print(b2.grid)
-    a1 = Action((0,0), (0,1), 1, 'L')
-    a2 = Action((1,1), (1, 0), 2, 'L')
-    a3 = Action((1,1), (0,1), 2, 'L')
-    actions = [a1, a2]
+    initial_pop = [{'x': 0, 'y': 0, 'hum': 0, 'vamp': 4, 'wolv': 0},
+                   {'x': 1, 'y': 3, 'hum': 5, 'vamp': 0, 'wolv': 0},
+                   {'x': 3, 'y': 1, 'hum': 3, 'vamp': 0, 'wolv': 0},
+                   {'x': 4, 'y': 3, 'hum': 0, 'vamp': 0, 'wolv': 3}]
 
-    print(b2.board_modification(actions))
+    test_board = Board((4,5),initial_pop)
+
+    start_GUI(test_board.grid, lambda x=None: None)
+
+    #a1 = Action((0,0), (0,1), 1, 'L')
+    #a2 = Action((1,1), (1, 0), 2, 'L')
+    #a3 = Action((1,1), (0,1), 2, 'L')
+    #actions = [a1, a2]
+
+    #print(b2.board_modification(actions))
 
