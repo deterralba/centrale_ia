@@ -19,7 +19,7 @@ def play(*args):
         draw(b.grid)
         sleep(0.1)
         p = p2 if p == p1 else p1
-    print(b.is_over() + 'won !')
+    print(b.is_over() + ' won!')
 
 
 if __name__ == '__main__':
@@ -42,4 +42,3 @@ if __name__ == '__main__':
     #actions = [a1, a2]
 
     #print(b2.board_modification(actions))
-

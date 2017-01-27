@@ -65,10 +65,10 @@ class Board:
             raise ValueError('impossible to resolve 3 races on one square')
         elif nb_zeros == 1:
             if self.grid[square][RACE_ID[HUM]] > 0:
-                result = attack_humans(self.currentPlayer, self.grid[square])
+                attack_humans(self.currentPlayer, self.grid[square])
             else:
-                result = attack_monsters(self.currentPlayer, self.grid[square])
-            self.grid[square] = result
+                attack_monsters(self.currentPlayer, self.grid[square])
+
 
 class Action:
     def __init__(self, from_square, to_square, number, race):
@@ -118,10 +118,8 @@ def attack_humans(attacker, square, probabilistic=False):
             units += enemies
             units = int(p*units)
             enemies = 0
-    res = [0, 0, 0]
-    res[RACE_ID[attacker]] = units
-    res[RACE_ID[HUM]] = enemies
-    return res
+    square[RACE_ID[attacker]] = units
+    square[RACE_ID[HUM]] = enemies
 
 def attack_monsters(attacker, square, probabilistic=False):
     units = square[RACE_ID[attacker]]
@@ -146,8 +144,5 @@ def attack_monsters(attacker, square, probabilistic=False):
         else:
             units = int(p*units)
             enemies = 0
-    res = [0, 0, 0]
-    res[RACE_ID[attacker]] = units
-    res[RACE_ID[enemy_race]] = enemies
-    return res
-
+    square[RACE_ID[attacker]] = units
+    square[RACE_ID[enemy_race]] = enemies

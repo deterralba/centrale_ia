@@ -1,6 +1,6 @@
-HUM = 'hum'
-VAMP = 'vamp'
-WOLV = 'wolv'
+HUM = 'humans'
+VAMP = 'vampires'
+WOLV = 'wolves'
 
 RACE_ID = {
     HUM: 0,

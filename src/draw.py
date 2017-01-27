@@ -5,7 +5,7 @@ SQUARE_SIZE = 40
 
 def draw_square(canvas, l, c, people):
     global SQUARE_SIZE
-    center = (SQUARE_SIZE * (c + 0.5), SQUARE_SIZE * (l + 0.5))
+    center = (SQUARE_SIZE*(c + 0.5), SQUARE_SIZE*(l + 0.5))
     race, number = people
     if race == VAMP:
         color = 'red'
@@ -39,9 +39,9 @@ def draw(board):
 
     # draw grid
     for l in range(1, line):
-        canvas.create_line(0, SQUARE_SIZE * l, SQUARE_SIZE * col, SQUARE_SIZE * l, fill='grey')
+        canvas.create_line(0, SQUARE_SIZE*l, SQUARE_SIZE*col, SQUARE_SIZE*l, fill='grey')
     for c in range(1, col):
-        canvas.create_line(SQUARE_SIZE * c, 0, SQUARE_SIZE * c, SQUARE_SIZE * line, fill='grey')
+        canvas.create_line(SQUARE_SIZE*c, 0, SQUARE_SIZE*c, SQUARE_SIZE*line, fill='grey')
 
     canvas.update()
 
