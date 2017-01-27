@@ -13,7 +13,7 @@ def draw_square(canvas, l, c, people):
         color = 'black'
         text_color = 'white'
     elif race == 'hum':
-        color = 'white'
+        color = 'white'  # say no to racism
         text_color = 'black'
     else:
         print(people)

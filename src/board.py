@@ -1,5 +1,5 @@
 import numpy as np
-from draw import *
+from draw import start_GUI
 
 RACE_ID = {
     'hum': 0,
@@ -7,73 +7,39 @@ RACE_ID = {
     'wolv': 2,
 }
 
+SKIP_CHECKS = False
+
+class ActionInvalidError(Exception):
+    pass
 
 class Board:
     def __init__(self, dimensions, initial_pop):
         shape = (dimensions[0], dimensions[1], 3)
         self.grid = np.zeros(shape, dtype=np.int32)
         self.update_grid(initial_pop)
-        #self.currentPlayer = 0
+        self.currentPlayer = None
 
     def update_grid(self, changed_squares):
         for square in changed_squares:
             x = square['x']
             y = square['y']
-            hum = square['hum']
-            vamp = square['vamp']
-            wolv = square['wolv']
-            self.grid[y,x,RACE_ID['hum']] = hum
-            self.grid[y,x,RACE_ID['vamp']] = vamp
-            self.grid[y,x,RACE_ID['wolv']] = wolv
-        #return self.grid?
-            
+            # x, y server representation is not equal to our line column matrix model
+            self.grid[y, x, RACE_ID['hum']] = square['hum']
+            self.grid[y, x, RACE_ID['vamp']] = square['vamp']
+            self.grid[y, x, RACE_ID['wolv']] = square['wolv']
 
-    def board_modification(self, actions):
-        # actions need to be grouped by their destination, so that several groups can attack the same square
-        # actions is a list of actions
-        print(actions[1].race)
-        group_actions = []
-        treated_actions = []
-        for action in actions:
-            if action not in treated_actions:
-                temp = [el for el in actions if el.to == action.to]
-                group_actions.append(temp)
-                treated_actions.extend(temp)
-
-        for el in group_actions:
-            if len(el) == 1:
-                self.do_one_action(el[0])
-            else:
-                self.do_actions(el)
-
-        return self.grid
-
-    def do_one_action(self, action):
-        # unique action to do separately because no other action have the same destination
-        if action.is_valid(self):
-            if self.grid[action.to][RACE_ID[action.race_ennemi]] == 0 or \
-            self.grid[action.to][RACE_ID['hum']] == 0:
-
-                self.grid[action._from][RACE_ID[action.race]] = \
-                self.grid[action._from][RACE_ID[action.race]] - action.number
-
-                self.grid[action.to][RACE_ID[action.race]] = \
-                self.grid[action.to][RACE_ID[action.race]] + action.number
-
-                return self.grid
-            elif self.grid[action.to][RACE_ID['hum']] != 0:
-                # a faire combat avec les humains
-                return None
-            elif self.grid[action.to][RACE_ID[action.race_ennemi]] == 0:
-                # a faire combat avec l'ennemi
-                return None
+    def moves(self, action):
+        ''' Moves the units, do not resolve any fight'''
+        if SKIP_CHECKS or action.is_valid(self):
+            self.grid[action._from][RACE_ID[action.race]] -= action.number
+            self.grid[action.to][RACE_ID[action.race]] += action.number
         else:
-            return 'Error'
+            raise ActionInvalidError('action not valid')
 
     def do_actions(self, actions):
-        # TODO
-        # list of actions which have the same destination
-        return None
+        for action in actions:
+            self.moves(action)
+        self.resolve_grid(self)
 
 
 class Action:
@@ -112,7 +78,7 @@ if __name__ == '__main__':
                    {'x': 3, 'y': 1, 'hum': 3, 'vamp': 0, 'wolv': 0},
                    {'x': 4, 'y': 3, 'hum': 0, 'vamp': 0, 'wolv': 3}]
 
-    test_board = Board((4,5),initial_pop)
+    test_board = Board((4,5), initial_pop)
 
     start_GUI(test_board.grid, lambda x=None: None)
 
