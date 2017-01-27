@@ -22,8 +22,8 @@ def draw_square(canvas, l, c, people):
     canvas.create_text(center[0], center[1], text=str(number), fill=text_color)
 
 
-def draw(canvas, board):
-    global SQUARE_SIZE
+def draw(board):
+    global SQUARE_SIZE, canvas
     canvas.delete('all')
 
     canvas.configure(background='green')
@@ -48,7 +48,7 @@ def get_people(case):
     return ('hum'*bool(case[0]) + 'vamp'*bool(case[1]) + 'wolv'*bool(case[2]), max(case))
 
 def start_GUI(board, start):
-    global SQUARE_SIZE, button
+    global SQUARE_SIZE, button, canvas
 
     line, col, _ = board.shape
 
@@ -57,7 +57,7 @@ def start_GUI(board, start):
     root.geometry('{}x{}'.format(SQUARE_SIZE*col, SQUARE_SIZE*line + 50))
 
     canvas = tkinter.Canvas(root, width=SQUARE_SIZE*col, height=SQUARE_SIZE*line)
-    draw(canvas, board)
+    draw(board)
     canvas.pack()
 
     root.bind('<Return>', start)
