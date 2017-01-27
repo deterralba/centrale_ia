@@ -39,7 +39,7 @@ class Board:
             self.grid[y, x, RACE_ID[WOLV]] = square[WOLV]
 
     def moves(self, action):
-        ''' Moves the units, do not resolve any fight'''
+        ''' Moves the units, does not resolve any fight'''
         if SKIP_CHECKS or action.is_valid(self):
             self.grid[action._from][RACE_ID[action.race]] -= action.number
             self.grid[action.to][RACE_ID[action.race]] += action.number
@@ -47,6 +47,11 @@ class Board:
             raise ActionInvalidError('action not valid: {}'.format(action))
 
     def do_actions(self, actions):
+        if not SKIP_CHECKS:
+            for square in self.enumerate_squares():
+                nb_zeros = list(self.grid[square]).count(0)
+                if nb_zeros < 2:
+                    raise ValueError('Board is not consistant: several races in one square: {}: {}'.format(square, self.grid[square]))
         for action in actions:
             self.moves(action)
         for square in self.enumerate_squares():
