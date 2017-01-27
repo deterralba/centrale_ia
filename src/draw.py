@@ -6,13 +6,13 @@ def draw_square(canvas, l, c, people):
     global SQUARE_SIZE
     center = (SQUARE_SIZE * (c + 0.5), SQUARE_SIZE * (l + 0.5))
     race, number = people
-    if race == 'V':
+    if race == 'vamp':
         color = 'red'
         text_color = 'white'
-    elif race == 'L':
+    elif race == 'wolv':
         color = 'black'
         text_color = 'white'
-    elif race == 'H':
+    elif race == 'hum':
         color = 'white'
         text_color = 'black'
     else:
@@ -45,7 +45,7 @@ def draw(canvas, board):
     canvas.update()
 
 def get_people(case):
-    return ('H'*bool(case[0]) + 'V'*bool(case[1]) + 'L'*bool(case[2]), max(case))
+    return ('hum'*bool(case[0]) + 'vamp'*bool(case[1]) + 'wolv'*bool(case[2]), max(case))
 
 def start_GUI(board, start):
     global SQUARE_SIZE, button
