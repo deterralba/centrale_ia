@@ -69,7 +69,6 @@ class Board:
             else:
                 attack_monsters(self.currentPlayer, self.grid[square])
 
-
 class Action:
     def __init__(self, from_square, to_square, number, race):
         self._from = from_square
