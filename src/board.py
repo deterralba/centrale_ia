@@ -17,7 +17,9 @@ class Board:
 
     def enumerate_squares(self):
         line, column, _ = self.grid.shape
-        return [(i, j) for i in range(line) for j in range(column)]
+        for i in range(line):
+            for j in range(column):
+                yield (i, j)
 
     def is_over(self):
         nb_w = 0
