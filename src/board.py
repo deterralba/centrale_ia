@@ -2,9 +2,9 @@ import numpy as np
 from draw import *
 
 RACE_ID = {
-    'H': 0,
-    'V': 1,
-    'L': 2,
+    'hum': 0,
+    'vamp': 1,
+    'wolv': 2,
 }
 
 
@@ -22,9 +22,9 @@ class Board:
             hum = square['hum']
             vamp = square['vamp']
             wolv = square['wolv']
-            self.grid[y,x,RACE_ID['H']] = hum
-            self.grid[y,x,RACE_ID['V']] = vamp
-            self.grid[y,x,RACE_ID['L']] = wolv
+            self.grid[y,x,RACE_ID['hum']] = hum
+            self.grid[y,x,RACE_ID['vamp']] = vamp
+            self.grid[y,x,RACE_ID['wolv']] = wolv
         #return self.grid?
             
 
@@ -52,7 +52,7 @@ class Board:
         # unique action to do separately because no other action have the same destination
         if action.is_valid(self):
             if self.grid[action.to][RACE_ID[action.race_ennemi]] == 0 or \
-            self.grid[action.to][RACE_ID['H']] == 0:
+            self.grid[action.to][RACE_ID['hum']] == 0:
 
                 self.grid[action._from][RACE_ID[action.race]] = \
                 self.grid[action._from][RACE_ID[action.race]] - action.number
@@ -61,7 +61,7 @@ class Board:
                 self.grid[action.to][RACE_ID[action.race]] + action.number
 
                 return self.grid
-            elif self.grid[action.to][RACE_ID['H']] != 0:
+            elif self.grid[action.to][RACE_ID['hum']] != 0:
                 # a faire combat avec les humains
                 return None
             elif self.grid[action.to][RACE_ID[action.race_ennemi]] == 0:
@@ -82,7 +82,7 @@ class Action:
         self.to = to_square
         self.number = number
         self.race = race
-        self.race_ennemi = 'L' if self.race == 'V' else 'V'
+        self.race_ennemi = 'wolv' if self.race == 'vamp' else 'vamp'
 
     @staticmethod
     def square_is_on_grid(square, grid):
@@ -116,9 +116,9 @@ if __name__ == '__main__':
 
     start_GUI(test_board.grid, lambda x=None: None)
 
-    #a1 = Action((0,0), (0,1), 1, 'L')
-    #a2 = Action((1,1), (1, 0), 2, 'L')
-    #a3 = Action((1,1), (0,1), 2, 'L')
+    #a1 = Action((0,0), (0,1), 1, 'wolv')
+    #a2 = Action((1,1), (1, 0), 2, 'wolv')
+    #a3 = Action((1,1), (0,1), 2, 'wolv')
     #actions = [a1, a2]
 
     #print(b2.board_modification(actions))
