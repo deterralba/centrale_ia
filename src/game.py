@@ -1,3 +1,4 @@
+from time import sleep, time
 from draw import start_GUI, draw
 from player import RamdomPlayer
 from const import RACE_ID, HUM, WOLV, VAMP
@@ -9,11 +10,13 @@ def play(*args):
     p = p1
     while not b.is_over():
         b.currentPlayer = p.race
+        start_time = time()
         actions = p.get_next_move(b)
-        print(actions)
+        if time() - start_time > 2:
+            print('player {} timeout and looses!'.format(p))
+            break
         b.do_actions(actions)
         draw(b.grid)
-        from time import sleep
         sleep(0.1)
         p = p2 if p == p1 else p1
     print(b.is_over() + 'won !')

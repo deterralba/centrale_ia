@@ -1,4 +1,5 @@
 import numpy as np
+from const import HUM, WOLV, VAMP
 
 SQUARE_SIZE = 40
 
@@ -6,13 +7,13 @@ def draw_square(canvas, l, c, people):
     global SQUARE_SIZE
     center = (SQUARE_SIZE * (c + 0.5), SQUARE_SIZE * (l + 0.5))
     race, number = people
-    if race == 'vamp':
+    if race == VAMP:
         color = 'red'
         text_color = 'white'
-    elif race == 'wolv':
+    elif race == WOLV:
         color = 'black'
         text_color = 'white'
-    elif race == 'hum':
+    elif race == HUM:
         color = 'white'  # say no to racism
         text_color = 'black'
     else:
@@ -45,7 +46,7 @@ def draw(board):
     canvas.update()
 
 def get_people(case):
-    return ('hum'*bool(case[0]) + 'vamp'*bool(case[1]) + 'wolv'*bool(case[2]), max(case))
+    return (HUM*bool(case[0]) + VAMP*bool(case[1]) + WOLV*bool(case[2]), max(case))
 
 def start_GUI(board, start):
     global SQUARE_SIZE, button, canvas
