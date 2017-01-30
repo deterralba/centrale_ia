@@ -35,10 +35,3 @@ if __name__ == '__main__':
     player1 = RamdomPlayer(VAMP)
     player2 = RamdomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))
-
-    #a1 = Action((0,0), (0,1), 1, WOLV)
-    #a2 = Action((1,1), (1, 0), 2, WOLV)
-    #a3 = Action((1,1), (0,1), 2, WOLV)
-    #actions = [a1, a2]
-
-    #print(b2.board_modification(actions))

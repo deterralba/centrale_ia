@@ -125,7 +125,7 @@ def attack_humans(attacker, square, probabilistic=False):
     square[RACE_ID[attacker]] = units
     square[RACE_ID[HUM]] = enemies
 
-def attack_monsters(attacker, square, probabilistic=False):
+def attack_monsters(attacker, square):
     units = square[RACE_ID[attacker]]
     enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
@@ -133,10 +133,12 @@ def attack_monsters(attacker, square, probabilistic=False):
     if units/enemies >= 1.5:
         enemies = 0
     else:
-        #si victoire (proba p) : chaque attaquant a une proba (p) de survivre
-        #                        chaque humain a une proba (p) de devenir allié
-        #si défaite (1-p) : aucun survivant coté attaquant
-        #                   chaque humain a une proba (1-p) de survivre
+        '''
+            si victoire (proba p) : chaque attaquant a une proba (p) de survivre
+                                    chaque humain a une proba (p) de devenir allié
+            si défaite (1-p) : aucun survivant coté attaquant
+                               chaque humain a une proba (1-p) de survivre
+        '''
         if units >= enemies:
             p = units / enemies - 0.5
         else:
