@@ -37,3 +37,27 @@ def test_action():
 
     assert Action.square_is_on_grid(shape, board.grid) is False
 
+
+def test_board_is_over():
+    shape = (3, 2) # 3 lines & 2 columns
+    board = Board(shape)
+
+    board.grid = np.array([
+        [[0, 1, 0], [0, 0, 0]],
+        [[0, 0, 0], [0, 0, 0]],
+        [[0, 0, 0], [0, 0, 2]],
+    ], dtype=np.int32)
+    assert board.is_over() is False
+
+    board.grid[0, 0] = [0, 0, 0]
+    print(board.grid)
+    assert board.is_over() == WOLV  # only wolves left
+
+    board.grid[0, 0] = [3, 0, 0]
+    assert board.is_over() == WOLV  # wolves with humans
+
+    board.grid[2, 1] = [0, 0, 0]
+    assert board.is_over() == HUM  # only humans
+
+    board.grid[0, 0] = [0, 0, 0]
+    assert board.is_over() == HUM  # empty board
