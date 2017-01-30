@@ -5,21 +5,21 @@ from const import HUM, WOLV, VAMP
 from board import Board
 
 
-def generate_play(p1, p2, b):
+def generate_play(player1, player2, board):
     def play(*args):
-        p = p1
-        while not b.is_over():
-            b.currentPlayer = p.race
+        current_player = player1
+        while not board.is_over():
+            board.currentPlayer = current_player.race
             start_time = time()
-            actions = p.get_next_move(b)
+            actions = current_player.get_next_move(board)
             if time() - start_time > 2:
-                print('player {} timeout and looses!'.format(p))
+                print('player {} timeout and looses!'.format(current_player))
                 break
-            b.do_actions(actions)
-            draw(b.grid)
+            board.do_actions(actions)
+            draw(board.grid)
             sleep(0.1)
-            p = p2 if p == p1 else p1
-        print(b.is_over() + ' won!')
+            current_player = player2 if current_player == player1 else player1
+        print(board.is_over() + ' won!')
     return play
 
 
@@ -31,10 +31,10 @@ if __name__ == '__main__':
                    {'x': 3, 'y': 1, HUM: 3, VAMP: 0, WOLV: 0},
                    {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
 
-    b = Board((4, 5), initial_pop)
-    p1 = RamdomPlayer(VAMP)
-    p2 = RamdomPlayer(WOLV)
-    start_GUI(b.grid, generate_play(p1, p2, b))
+    board = Board((4, 5), initial_pop)
+    player1 = RamdomPlayer(VAMP)
+    player2 = RamdomPlayer(WOLV)
+    start_GUI(board.grid, generate_play(player1, player2, board))
 
     #a1 = Action((0,0), (0,1), 1, WOLV)
     #a2 = Action((1,1), (1, 0), 2, WOLV)
