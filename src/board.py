@@ -9,19 +9,22 @@ class ActionInvalidError(Exception):
     pass
 
 class Board:
-    def __init__(self, dimensions, initial_pop):
+    def __init__(self, dimensions, initial_pop=None):
         shape = (dimensions[0], dimensions[1], 3)
         self.grid = np.zeros(shape, dtype=np.int32)
-        self.update_grid(initial_pop)
+        if initial_pop is not None:
+            self.update_grid(initial_pop)
         self.currentPlayer = None
 
     def enumerate_squares(self):
+        ''' Returns a generator iterating over the coordinates of the squares of the grid '''
         line, column, _ = self.grid.shape
         for i in range(line):
             for j in range(column):
                 yield (i, j)
 
     def is_over(self):
+        ''' Returns the winning race, or False if the game is not over '''
         nb_w = 0
         nb_v = 0
         for square in self.enumerate_squares():
@@ -43,7 +46,7 @@ class Board:
     def moves(self, action):
         ''' Moves the units, does not resolve any fight'''
         if SKIP_CHECKS or action.is_valid(self):
-            self.grid[action._from][RACE_ID[action.race]] -= action.number
+            self.grid[action.from_][RACE_ID[action.race]] -= action.number
             self.grid[action.to][RACE_ID[action.race]] += action.number
         else:
             raise ActionInvalidError('action not valid: {}'.format(action))
@@ -73,14 +76,14 @@ class Board:
 
 class Action:
     def __init__(self, from_square, to_square, number, race):
-        self._from = from_square
+        self.from_ = from_square
         self.to = to_square
         self.number = number
         self.race = race
         self.race_ennemi = WOLV if self.race == VAMP else VAMP
 
     def __repr__(self):
-        return '{} {} {} {}'.format(self._from, self.to, self.number, self.race)
+        return '{} {} {} {}'.format(self.from_, self.to, self.number, self.race)
 
     @staticmethod
     def square_is_on_grid(square, grid):
@@ -90,17 +93,17 @@ class Action:
         ])
 
     def is_valid(self, board, actions=None):
-        dif_x = abs(self._from[0] - self.to[0])
-        dif_y = abs(self._from[1] - self.to[1])
+        dif_x = abs(self.from_[0] - self.to[0])
+        dif_y = abs(self.from_[1] - self.to[1])
         return all([
             dif_x <= 1,
             dif_y <= 1,
-            self._from != self.to,
+            self.from_ != self.to,
             self.race in [VAMP, WOLV],
             Action.square_is_on_grid(self.to, board.grid),
-            Action.square_is_on_grid(self._from, board.grid) and \
-                0 < self.number <= board.grid[self._from][RACE_ID[self.race]],
-            not actions or self.to not in [ac._from for ac in actions]
+            Action.square_is_on_grid(self.from_, board.grid) and \
+                0 < self.number <= board.grid[self.from_][RACE_ID[self.race]],
+            not actions or self.to not in [ac.from_ for ac in actions]
         ])
 
 def attack_humans(attacker, square, probabilistic=False):
