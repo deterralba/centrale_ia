@@ -9,7 +9,7 @@ def test_action():
         [[0, 1, 0], [0, 0, 0]],
         [[0, 0, 0], [0, 0, 0]],
         [[0, 0, 0], [0, 0, 2]],
-    ], dtype=np.int32)
+    ], dtype=np.uint8)
 
     from_case = (0, 0)
     to_case = (0, 1)
@@ -46,7 +46,7 @@ def test_board_is_over():
         [[0, 1, 0], [0, 0, 0]],
         [[0, 0, 0], [0, 0, 0]],
         [[0, 0, 0], [0, 0, 2]],
-    ], dtype=np.int32)
+    ], dtype=np.uint8)
     assert board.is_over() is False
 
     board.grid[0, 0] = [0, 0, 0]

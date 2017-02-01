@@ -11,7 +11,7 @@ class ActionInvalidError(Exception):
 class Board:
     def __init__(self, dimensions, initial_pop=None):
         shape = (dimensions[0], dimensions[1], 3)
-        self.grid = np.zeros(shape, dtype=np.int32)
+        self.grid = np.zeros(shape, dtype=np.uint8)
         if initial_pop is not None:
             self.update_grid(initial_pop)
         self.currentPlayer = None
@@ -106,7 +106,7 @@ class Action:
             not actions or self.to not in [ac.from_ for ac in actions]
         ])
 
-def attack_humans(attacker, square, probabilistic=False):
+def attack_humans(attacker, square):
     units = square[RACE_ID[attacker]]
     enemies = square[RACE_ID[HUM]]
     if units/enemies >= 1:
@@ -133,12 +133,6 @@ def attack_monsters(attacker, square):
     if units/enemies >= 1.5:
         enemies = 0
     else:
-        '''
-            si victoire (proba p) : chaque attaquant a une proba (p) de survivre
-                                    chaque humain a une proba (p) de devenir allié
-            si défaite (1-p) : aucun survivant coté attaquant
-                               chaque humain a une proba (1-p) de survivre
-        '''
         if units >= enemies:
             p = units / enemies - 0.5
         else:
