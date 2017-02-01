@@ -1,19 +1,20 @@
 import numpy as np
+from const import HUM, WOLV, VAMP
 
 SQUARE_SIZE = 40
 
 def draw_square(canvas, l, c, people):
     global SQUARE_SIZE
-    center = (SQUARE_SIZE * (c + 0.5), SQUARE_SIZE * (l + 0.5))
+    center = (SQUARE_SIZE*(c + 0.5), SQUARE_SIZE*(l + 0.5))
     race, number = people
-    if race == 'V':
+    if race == VAMP:
         color = 'red'
         text_color = 'white'
-    elif race == 'L':
+    elif race == WOLV:
         color = 'black'
         text_color = 'white'
-    elif race == 'H':
-        color = 'white'
+    elif race == HUM:
+        color = 'white'  # say no to racism
         text_color = 'black'
     else:
         print(people)
@@ -22,8 +23,8 @@ def draw_square(canvas, l, c, people):
     canvas.create_text(center[0], center[1], text=str(number), fill=text_color)
 
 
-def draw(canvas, board):
-    global SQUARE_SIZE
+def draw(board):
+    global SQUARE_SIZE, canvas
     canvas.delete('all')
 
     canvas.configure(background='green')
@@ -38,17 +39,17 @@ def draw(canvas, board):
 
     # draw grid
     for l in range(1, line):
-        canvas.create_line(0, SQUARE_SIZE * l, SQUARE_SIZE * col, SQUARE_SIZE * l, fill='grey')
+        canvas.create_line(0, SQUARE_SIZE*l, SQUARE_SIZE*col, SQUARE_SIZE*l, fill='grey')
     for c in range(1, col):
-        canvas.create_line(SQUARE_SIZE * c, 0, SQUARE_SIZE * c, SQUARE_SIZE * line, fill='grey')
+        canvas.create_line(SQUARE_SIZE*c, 0, SQUARE_SIZE*c, SQUARE_SIZE*line, fill='grey')
 
     canvas.update()
 
 def get_people(case):
-    return ('H'*bool(case[0]) + 'L'*bool(case[1]) + 'V'*bool(case[2]), max(case))
+    return (HUM*bool(case[0]) + VAMP*bool(case[1]) + WOLV*bool(case[2]), max(case))
 
 def start_GUI(board, start):
-    global SQUARE_SIZE, button
+    global SQUARE_SIZE, button, canvas
 
     line, col, _ = board.shape
 
@@ -57,7 +58,7 @@ def start_GUI(board, start):
     root.geometry('{}x{}'.format(SQUARE_SIZE*col, SQUARE_SIZE*line + 50))
 
     canvas = tkinter.Canvas(root, width=SQUARE_SIZE*col, height=SQUARE_SIZE*line)
-    draw(canvas, board)
+    draw(board)
     canvas.pack()
 
     root.bind('<Return>', start)
@@ -66,12 +67,7 @@ def start_GUI(board, start):
 
     root.mainloop()
 
-if __name__ == '__main__':
-    board = np.array(
-        [[[2, 0, 0], [0, 0, 0], [0, 1, 0]],
-         [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
-         [[0, 0, 3], [0, 0, 0], [1, 0, 0]],
-        ],
-    dtype=np.int32)
-    start_GUI(board, lambda x=None: None)
+
+
+
 

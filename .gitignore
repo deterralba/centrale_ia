@@ -88,10 +88,12 @@ ENV/
 # Rope project settings
 .ropeproject
 
+.idea
+.DS_Store
+
 # vim temp files
 *.swp
 
 # PyDev stuff:
 .project
 .pydevproject
-
