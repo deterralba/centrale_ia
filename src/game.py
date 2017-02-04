@@ -12,12 +12,13 @@ def generate_play(player1, player2, board):
             board.currentPlayer = current_player.race
             start_time = time()
             actions = current_player.get_next_move(board)
+            sleep(0.5)
             if time() - start_time > 2:
                 print('player {} timeout and looses!'.format(current_player))
                 break
             board.do_actions(actions)
             draw(board.grid)
-            sleep(0.1)
+            sleep(0.5)
             current_player = player2 if current_player == player1 else player1
         print(board.is_over() + ' won!')
     return play
