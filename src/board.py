@@ -5,8 +5,10 @@ from const import RACE_ID, HUM, WOLV, VAMP
 
 SKIP_CHECKS = False
 
+
 class ActionInvalidError(Exception):
     pass
+
 
 class Board:
     def __init__(self, dimensions, initial_pop=None):
@@ -25,13 +27,18 @@ class Board:
 
     def is_over(self):
         ''' Returns the winning race, or False if the game is not over '''
-        nb_w = 0
-        nb_v = 0
-        for square in self.enumerate_squares():
-            nb_v += self.grid[square][RACE_ID[VAMP]]
-            nb_w += self.grid[square][RACE_ID[WOLV]]
-            if nb_w and nb_v:
-                return False
+        # old way to do it
+        # nb_w = 0
+        # nb_v = 0
+        # for square in self.enumerate_squares():
+        #     nb_v += self.grid[square][RACE_ID[VAMP]]
+        #     nb_w += self.grid[square][RACE_ID[WOLV]]
+
+        # new way to do it
+        nb_w = np.sum(self.grid, axis=(0, 1))[RACE_ID[WOLV]]
+        nb_v = np.sum(self.grid, axis=(0, 1))[RACE_ID[VAMP]]
+        if nb_w and nb_v:
+            return False
         return VAMP*(bool(nb_v)) + WOLV*(bool(nb_w)) or HUM
 
     def update_grid(self, changed_squares):
@@ -74,6 +81,7 @@ class Board:
             else:
                 attack_monsters(self.currentPlayer, self.grid[square])
 
+
 class Action:
     def __init__(self, from_square, to_square, number, race):
         self.from_ = from_square
@@ -106,6 +114,7 @@ class Action:
             not actions or self.to not in [ac.from_ for ac in actions]
         ])
 
+
 def attack_humans(attacker, square):
     units = square[RACE_ID[attacker]]
     enemies = square[RACE_ID[HUM]]
@@ -124,6 +133,7 @@ def attack_humans(attacker, square):
             enemies = 0
     square[RACE_ID[attacker]] = units
     square[RACE_ID[HUM]] = enemies
+
 
 def attack_monsters(attacker, square):
     units = square[RACE_ID[attacker]]

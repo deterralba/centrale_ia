@@ -1,6 +1,7 @@
 from random import randint
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action
+from algo_mini_max import evaluate, minimax, max_play, min_play
 
 
 class Player:
@@ -24,18 +25,8 @@ class RamdomPlayer(Player):
 
 
 class SmartPlayer(Player):
-    def heuristique(self, board):
-        count_race = 0
-        count_ennemi = 0
-        # TODO remplace by a numpy function
-        for square in board.enumerate_squares():
-            count_race = count_race + board.grid[square][RACE_ID[self.race]]
-            count_ennemi = count_ennemi + board.grid[square][RACE_ID[self.ennemi]]
-        return count_race - count_ennemi
-
     def get_next_move(self, board):
-        actions = []
-        return None
+        return minimax(board, self.race, self.race_ennemi)
 
 
 def get_random_adjacent_square(grid, square):
