@@ -63,7 +63,7 @@ class Board:
             for square in self.enumerate_squares():
                 nb_zeros = list(self.grid[square]).count(0)
                 if nb_zeros < 2:
-                    raise ValueError('Board is not consistant: several races in one square: {}: {}'.format(square, self.grid[square]))
+                    raise ValueError('Board is not consistent: several races in one square: {}: {}'.format(square, self.grid[square]))
         for action in actions:
             self.moves(action)
         for square in self.enumerate_squares():
@@ -80,6 +80,26 @@ class Board:
                 attack_humans(self.currentPlayer, self.grid[square])
             else:
                 attack_monsters(self.currentPlayer, self.grid[square])
+
+    def get_available_moves(self, race):
+        '''return a list of possible actions'''
+        actions = []
+        possibles_to = []
+        for square in self.enumerate_squares():
+            units = self.grid[square][RACE_ID[race]]
+            if units > 0:
+                possibles_to.append((square[0] - 1, square[1] - 1))
+                possibles_to.append((square[0], square[1] - 1))
+                possibles_to.append((square[0] + 1, square[1] - 1))
+                possibles_to.append((square[0] + 1, square[1]))
+                possibles_to.append((square[0] + 1, square[1] + 1))
+                possibles_to.append((square[0], square[1] + 1))
+                possibles_to.append((square[0] - 1, square[1] + 1))
+                possibles_to.append((square[0] - 1, square[1]))
+                for to in possibles_to:
+                    if Action.square_is_on_grid(to, self.grid):
+                        actions.append(Action(square, to, units, race))
+        return actions
 
 
 class Action:

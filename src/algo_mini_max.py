@@ -15,7 +15,7 @@ def evaluate(board, race, race_ennemi):
 
 def minimax(board, race, race_ennemi):
     '''sans division de groupe / tout le monde bouge'''
-    moves = board.get_available_moves(race) # TODO return a list of possible actions
+    moves = board.get_available_moves(race)  # TODO return a list of possible actions
     best_move = moves[0]
     best_score = float('-inf')
     for move in moves:
