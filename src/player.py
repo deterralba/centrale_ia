@@ -26,7 +26,7 @@ class RamdomPlayer(Player):
 
 class SmartPlayer(Player):
     def get_next_move(self, board):
-        return minimax(board, self.race, self.race_ennemi)
+        return minimax(board, self.race, self.race_ennemi, 1)
 
 
 def get_random_adjacent_square(grid, square):

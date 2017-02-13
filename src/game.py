@@ -1,6 +1,6 @@
 from time import sleep, time
 from draw import start_GUI, draw
-from player import RamdomPlayer
+from player import RamdomPlayer, SmartPlayer
 from const import HUM, WOLV, VAMP
 from board import Board
 
@@ -11,7 +11,9 @@ def generate_play(player1, player2, board):
         while not board.is_over():
             board.currentPlayer = current_player.race
             start_time = time()
+            print('hoho')
             actions = current_player.get_next_move(board)
+            print('hehe')
             sleep(0.2)
             if time() - start_time > 2:
                 print('player {} timeout and looses!'.format(current_player))
@@ -33,6 +35,6 @@ if __name__ == '__main__':
                    {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
 
     board = Board((4, 5), initial_pop)
-    player1 = RamdomPlayer(VAMP)
+    player1 = SmartPlayer(VAMP)
     player2 = RamdomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))

@@ -27,16 +27,9 @@ class Board:
 
     def is_over(self):
         ''' Returns the winning race, or False if the game is not over '''
-        # old way to do it
-        # nb_w = 0
-        # nb_v = 0
-        # for square in self.enumerate_squares():
-        #     nb_v += self.grid[square][RACE_ID[VAMP]]
-        #     nb_w += self.grid[square][RACE_ID[WOLV]]
-
-        # new way to do it
-        nb_w = np.sum(self.grid, axis=(0, 1))[RACE_ID[WOLV]]
-        nb_v = np.sum(self.grid, axis=(0, 1))[RACE_ID[VAMP]]
+        sum_ = np.sum(self.grid, axis=(0, 1))
+        nb_w = sum_[RACE_ID[WOLV]]
+        nb_v = sum_[RACE_ID[VAMP]]
         if nb_w and nb_v:
             return False
         return VAMP*(bool(nb_v)) + WOLV*(bool(nb_w)) or HUM
@@ -80,26 +73,6 @@ class Board:
                 attack_humans(self.currentPlayer, self.grid[square])
             else:
                 attack_monsters(self.currentPlayer, self.grid[square])
-
-    def get_available_moves(self, race):
-        '''return a list of possible actions'''
-        actions = []
-        possibles_to = []
-        for square in self.enumerate_squares():
-            units = self.grid[square][RACE_ID[race]]
-            if units > 0:
-                possibles_to.append((square[0] - 1, square[1] - 1))
-                possibles_to.append((square[0], square[1] - 1))
-                possibles_to.append((square[0] + 1, square[1] - 1))
-                possibles_to.append((square[0] + 1, square[1]))
-                possibles_to.append((square[0] + 1, square[1] + 1))
-                possibles_to.append((square[0], square[1] + 1))
-                possibles_to.append((square[0] - 1, square[1] + 1))
-                possibles_to.append((square[0] - 1, square[1]))
-                for to in possibles_to:
-                    if Action.square_is_on_grid(to, self.grid):
-                        actions.append(Action(square, to, units, race))
-        return actions
 
 
 class Action:
