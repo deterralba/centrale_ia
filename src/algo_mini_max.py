@@ -76,17 +76,11 @@ def get_available_moves(board, race):
     for square in board.enumerate_squares():
         units = board.grid[square][RACE_ID[race]]
         if units > 0:
-            possibles_to.append((square[0] - 1, square[1] - 1))
-            possibles_to.append((square[0], square[1] - 1))
-            possibles_to.append((square[0] + 1, square[1] - 1))
-            possibles_to.append((square[0] + 1, square[1]))
-            possibles_to.append((square[0] + 1, square[1] + 1))
-            possibles_to.append((square[0], square[1] + 1))
-            possibles_to.append((square[0] - 1, square[1] + 1))
-            possibles_to.append((square[0] - 1, square[1]))
-            for to in possibles_to:
-                if Action.square_is_on_grid(to, board.grid):
-                    actions.append(Action(square, to, units, race))
+            possibles_to = [
+                (square[0] + i , square[1] + j) for i in range(-1, 2) for j in range(-1, 2)
+                if Action.square_is_on_grid((square[0] + i, square[0] + j), board.grid)
+            ]
+            actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
 
 
