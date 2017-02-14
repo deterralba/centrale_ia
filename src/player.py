@@ -1,7 +1,6 @@
 from random import randint
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action
-from algo_mini_max import evaluate, minimax, max_play, min_play
 
 
 class Player:
@@ -22,11 +21,6 @@ class RamdomPlayer(Player):
                 to = get_random_adjacent_square(board.grid, square)
                 actions.append(Action(square, to, units, self.race))
         return actions
-
-
-class SmartPlayer(Player):
-    def get_next_move(self, board):
-        return minimax(board, self.race, self.race_ennemi, 1)
 
 
 def get_random_adjacent_square(grid, square):

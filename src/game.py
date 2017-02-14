@@ -1,6 +1,7 @@
 from time import sleep, time
 from draw import start_GUI, draw
-from player import RamdomPlayer, SmartPlayer
+from player import RamdomPlayer
+from minmax_player import SmartPlayer
 from const import HUM, WOLV, VAMP
 from board import Board
 
