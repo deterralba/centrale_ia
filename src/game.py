@@ -12,18 +12,15 @@ def generate_play(player1, player2, board):
         while not board.is_over():
             board.current_player = current_player.race
             start_time = time()
-            print('hoho')
             actions = current_player.get_next_move(board)
-            print('hehe')
-            sleep(0.2)
             if time() - start_time > 2:
                 print('player {} timeout and looses!'.format(current_player))
                 #break # FIXME
             print('action of {} are {}'.format(board.current_player, actions))
             board.do_actions(actions)
             draw(board.grid)
-            sleep(0.2)
-            pause = input()
+            #sleep(0.2)
+            #pause = input()
             current_player = player2 if current_player == player1 else player1
         print(board.is_over() + ' won!')
     return play
@@ -40,5 +37,6 @@ if __name__ == '__main__':
     board = Board((4, 5), initial_pop)
     SmartPlayer.DEPTH = 5
     player1 = SmartPlayer(VAMP)
-    player2 = RamdomPlayer(WOLV)
+    player2 = SmartPlayer(WOLV)
+    #player2 = RamdomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))

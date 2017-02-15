@@ -55,6 +55,9 @@ def min_play(board, race, race_ennemi, depth):
         #print('score = ' + str(score))
         if score < min_score:
             min_score = score
+            if min_score == float('-inf'):
+                #print('returning -inf')
+                return min_score
     #print('min_score = ' + str(min_score))
     return min_score
 
@@ -77,6 +80,9 @@ def max_play(board, race, race_ennemi, depth):
         #print('score = ' + str(score))
         if score > max_score:
             max_score = score
+            if max_score == float('inf'):
+                #print('returning inf')
+                return max_score
     #print('max_score = ' + str(max_score))
     return max_score
 
