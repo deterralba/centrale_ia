@@ -129,7 +129,7 @@ def attack_monsters(attacker, square):
     units = square[RACE_ID[attacker]]
     enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
-    print('Enemies : {} {}'.format(enemy_race, enemies))
+    #print('Enemies : {} {}'.format(enemy_race, enemies))
     if units/enemies >= 1.5:
         enemies = 0
     else:
