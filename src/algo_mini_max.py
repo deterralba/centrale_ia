@@ -2,6 +2,7 @@ import numpy as np
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 
+TRANSPOSITION_TABLE = {}
 
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
@@ -11,7 +12,7 @@ def evaluate(board, race, race_ennemi):
     elif sum_[RACE_ID[race_ennemi]] == 0:
         return float('inf')
     else:
-        return sum_[RACE_ID[race]] - sum_[RACE_ID[race_ennemi]]
+        return int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])
 
 
 def minimax(board, race, race_ennemi, depth):
@@ -38,7 +39,7 @@ def minimax(board, race, race_ennemi, depth):
 
 
 def min_play(board, race, race_ennemi, depth):
-    #print('entering min_play, depth {}'.format(depth))
+    # print('entering min_play, depth {}'.format(depth))
     winning_race = board.is_over()
     if winning_race:
         return float('inf') if winning_race == race else float('-inf')
@@ -52,7 +53,7 @@ def min_play(board, race, race_ennemi, depth):
         clone_board.current_player = race_ennemi
         clone_board.do_actions([action])
         score = max_play(clone_board, race, race_ennemi, depth-1)
-        #print('score = ' + str(score))
+        # print('score = ' + str(score))
         if score < min_score:
             min_score = score
             if min_score == float('-inf'):
@@ -77,13 +78,13 @@ def max_play(board, race, race_ennemi, depth):
         clone_board.current_player = race
         clone_board.do_actions([action])
         score = min_play(clone_board, race, race_ennemi, depth-1)
-        #print('score = ' + str(score))
+        # print('score = ' + str(score))
         if score > max_score:
             max_score = score
             if max_score == float('inf'):
-                #print('returning inf')
+                # print('returning inf')
                 return max_score
-    #print('max_score = ' + str(max_score))
+    # print('max_score = ' + str(max_score))
     return max_score
 
 
@@ -101,3 +102,12 @@ def get_available_moves(board, race):
             actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
 
+
+def add_to_transposition_table(board, score):
+    global TRANSPOSITION_TABLE
+    if board in TRANSPOSITION_TABLE.keys():
+        print('board already in TRANSPOSITION_TABLE')
+    else:
+        TRANSPOSITION_TABLE[board] = score
+        print('board successfully added to the TRANSPOSITION_TABLE')
+    return None
