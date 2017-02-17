@@ -5,7 +5,7 @@ from const import HUM, WOLV, VAMP
 from board import Board
 
 
-def generate_play(player1, player2, board):
+def generate_play(player1, player2, board, isGraphical):
     def play(*args):
         current_player = player1
         while not board.is_over():
@@ -16,11 +16,16 @@ def generate_play(player1, player2, board):
                 print('player {} timeout and looses!'.format(current_player))
                 break
             board.do_actions(actions)
-            draw(board.grid)
-            sleep(0.1)
+            if isGraphical:
+                draw(board.grid)
+                sleep(0.1)
             current_player = player2 if current_player == player1 else player1
-        print(board.is_over() + ' won!')
+        if isGraphical:
+            print(board.is_over() + ' won!')
+        return board.is_over()
     return play
+
+
 
 
 if __name__ == '__main__':
@@ -34,4 +39,4 @@ if __name__ == '__main__':
     board = Board((4, 5), initial_pop)
     player1 = RamdomPlayer(VAMP)
     player2 = RamdomPlayer(WOLV)
-    start_GUI(board.grid, generate_play(player1, player2, board))
+    start_GUI(board.grid, generate_play(player1, player2, board, isGraphical=True))
