@@ -10,6 +10,7 @@ class ActionInvalidError(Exception):
 
 class Board:
     SKIP_CHECKS = False
+
     def __init__(self, dimensions, initial_pop=None, grid=None):
         shape = (dimensions[0], dimensions[1], 3)
         if grid is not None:
@@ -50,17 +51,6 @@ class Board:
             self.grid[y, x, RACE_ID[VAMP]] = square[VAMP]
             self.grid[y, x, RACE_ID[WOLV]] = square[WOLV]
 
-    def calc_update(self, changed_squares):
-        update = []
-        for square in changed_squares:
-            x = square[1]
-            y = square[0]
-            hum = self.grid[y, x, RACE_ID[HUM]]
-            vamp = self.grid[y, x, RACE_ID[VAMP]]
-            wolv = self.grid[y, x, RACE_ID[WOLV]]
-            update.append({'x': x, 'y': y, HUM : hum, VAMP : vamp, WOLV : wolv})
-        return update
-
     def moves(self, action):
         ''' Moves the units, does not resolve any fight'''
         if self.SKIP_CHECKS or action.is_valid(self):
@@ -75,14 +65,10 @@ class Board:
                 nb_zeros = list(self.grid[square]).count(0)
                 if nb_zeros < 2:
                     raise ValueError('Board is not consistent: several races in one square: {}: {}'.format(square, self.grid[square]))
-        changed_squares = []
         for action in actions:
-            changed_squares.append(action.from_)
-            changed_squares.append(action.to)
             self.moves(action)
         for square in self.enumerate_squares():
             self.resolve_square(square)
-        return self.calc_update(changed_squares)
 
     def resolve_square(self, square):
         nb_zeros = list(self.grid[square]).count(0)
@@ -139,23 +125,12 @@ def attack_humans(attacker, square):
         enemies = 0
     else:
         p = units / (2 * enemies)
-        sort = random()
-        if sort > p:
+        if 0.5 > p:
             units = 0
-            temp_en = 0
-            for i in range(enemies):
-                lives = random()
-                if lives> (1-p):
-                    temp_en +=1
-            enemies = int(temp_en)
+            enemies = int(enemies * (1-p))
         else:
             units += enemies
-            temp_units = 0
-            for i in range(units):
-                lives = random()
-                if lives > p :
-                    temp_units +=1
-            units = int(temp_units)
+            units = int(p*units)
             enemies = 0
     square[RACE_ID[attacker]] = units
     square[RACE_ID[HUM]] = enemies
@@ -173,22 +148,11 @@ def attack_monsters(attacker, square):
             p = units / enemies - 0.5
         else:
             p = units / (2 * enemies)
-        sort = random()
-        if sort > p:  # defeat of attacker
+        if 0.5 > p:  # defeat of attacker
             units = 0
-            temp_en = 0
-            for i in range(units):
-                lives = random()
-                if lives > (1-p):
-                    temp_en += 1
-            enemies = int(temp_en)
+            enemies = int(enemies * (1-p))
         else:
-            temp_unit = 0
-            for i in range(units):
-                lives = random()
-                if lives > p:
-                    temp_unit += 1
-            units = int(temp_unit)
+            units = int(p*units)
             enemies = 0
     square[RACE_ID[attacker]] = units
     square[RACE_ID[enemy_race]] = enemies

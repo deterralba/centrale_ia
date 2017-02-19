@@ -9,16 +9,18 @@ from board import Board
 def generate_play(player1, player2, board):
     def play(*args):
         current_player = player1
+        list_updates = [[],[]]
         while not board.is_over():
             board.current_player = current_player.race
             start_time = time()
-            actions = current_player.get_next_move(board)
+            actions = current_player.get_next_move(list_updates[0] + list_updates[1])
             if time() - start_time > 2:
                 print('player {} timeout and looses!'.format(current_player))
                 # break # FIXME
             print('action of {} are {}'.format(board.current_player, actions))
             print('='*40)
-            board.do_actions(actions)
+            list_updates[0] = list_updates[1]
+            list_updates[1] = board.do_actions(actions)
             draw(board.grid)
             sleep(0.1)
             # pause = input()
@@ -37,7 +39,7 @@ if __name__ == '__main__':
 
     board = Board((4, 5), initial_pop)
     MiniMaxPlayer.DEPTH = 3
-    player1 = MiniMaxPlayer(VAMP, {})
-    player2 = MiniMaxPlayer(WOLV, {})
+    player1 = MiniMaxPlayer(VAMP, {}, board)
+    player2 = MiniMaxPlayer(WOLV, {}, board)
     # player2 = RandomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))
