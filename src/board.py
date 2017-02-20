@@ -145,7 +145,7 @@ def attack_humans(attacker, square):
             temp_en = 0
             for i in range(enemies):
                 lives = random()
-                if lives> (1-p):
+                if lives < (1-p):
                     temp_en +=1
             enemies = int(temp_en)
         else:
@@ -153,7 +153,7 @@ def attack_humans(attacker, square):
             temp_units = 0
             for i in range(units):
                 lives = random()
-                if lives > p :
+                if lives < p :
                     temp_units +=1
             units = int(temp_units)
             enemies = 0
@@ -179,14 +179,14 @@ def attack_monsters(attacker, square):
             temp_en = 0
             for i in range(units):
                 lives = random()
-                if lives > (1-p):
+                if lives < (1-p):
                     temp_en += 1
             enemies = int(temp_en)
         else:
             temp_unit = 0
             for i in range(units):
                 lives = random()
-                if lives > p:
+                if lives < p:
                     temp_unit += 1
             units = int(temp_unit)
             enemies = 0
