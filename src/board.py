@@ -80,7 +80,7 @@ class Board:
             changed_squares.append(action.from_)
             changed_squares.append(action.to)
             self.moves(action)
-        for square in self.enumerate_squares():
+        for square in changed_squares:
             self.resolve_square(square)
         return self.calc_update(changed_squares)
 

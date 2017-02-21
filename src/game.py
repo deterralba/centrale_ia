@@ -35,7 +35,7 @@ if __name__ == '__main__':
                    {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
                    {'x': 3, 'y': 3, HUM: 0, VAMP: 0, WOLV: 1},
                    {'x': 3, 'y': 1, HUM: 3, VAMP: 0, WOLV: 0},
-                   {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
+                   {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 4}]
 
     board = Board((4, 5), initial_pop)
     MiniMaxPlayer.DEPTH = 3

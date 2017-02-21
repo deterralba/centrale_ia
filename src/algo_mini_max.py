@@ -1,6 +1,6 @@
 import numpy as np
 from const import RACE_ID, HUM, WOLV, VAMP
-from board_IA import Action, Board
+from board import Action, Board
 
 
 def evaluate(board, race, race_ennemi):
