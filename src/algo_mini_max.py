@@ -32,9 +32,13 @@ def minimax(board, race, race_ennemi, depth, transposition_table):
             score = transposition_table[clone_grid]
         else:
             clone_board.current_player = race
-            clone_board.do_actions([action])
-            score = min_play(clone_board, race, race_ennemi, depth, transposition_table)
-            transposition_table = add_to_transposition_table(transposition_table, clone_grid, score)
+            res = clone_board.do_actions([action], IA=True)
+            if res is None:
+                score = min_play(clone_board, race, race_ennemi, depth, transposition_table)
+                transposition_table = add_to_transposition_table(transposition_table, clone_grid, score)
+            else:
+                score = res[1] * min_play(res[0], race, race_ennemi, depth, transposition_table) \
+                        + res[3]*min_play(res[2], race, race_ennemi, depth, transposition_table)
         if score > best_score:
             best_action = action
             best_score = score
@@ -62,8 +66,12 @@ def min_play(board, race, race_ennemi, depth, transposition_table):
             score = transposition_table[clone_grid]
         else:
             clone_board.current_player = race_ennemi
-            clone_board.do_actions([action])
-            score = max_play(clone_board, race, race_ennemi, depth-1, transposition_table)
+            res = clone_board.do_actions([action], IA=True)
+            if res is None:
+                score = max_play(clone_board, race, race_ennemi, depth-1, transposition_table)
+            else:
+                score = res[1] * max_play(res[0], race, race_ennemi, depth-1, transposition_table) \
+                        + res[3] * max_play(res[2], race, race_ennemi, depth-1, transposition_table)
             # print('score = ' + str(score))
         if score < min_score:
             min_score = score
@@ -92,8 +100,12 @@ def max_play(board, race, race_ennemi, depth, transposition_table):
             score = transposition_table[clone_grid]
         else:
             clone_board.current_player = race
-            clone_board.do_actions([action])
-            score = min_play(clone_board, race, race_ennemi, depth-1, transposition_table)
+            res = clone_board.do_actions([action], IA=True)
+            if res is None:
+                score = min_play(clone_board, race, race_ennemi, depth - 1, transposition_table)
+            else:
+                score = res[1] * min_play(res[0], race, race_ennemi, depth - 1, transposition_table) \
+                        + res[3] * min_play(res[2], race, race_ennemi, depth - 1, transposition_table)
             # print('score = ' + str(score))
         if score > max_score:
             max_score = score

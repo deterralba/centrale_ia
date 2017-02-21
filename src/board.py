@@ -69,7 +69,7 @@ class Board:
         else:
             raise ActionInvalidError('action not valid: {}'.format(action))
 
-    def do_actions(self, actions):
+    def do_actions(self, actions, IA=False):
         if not self.SKIP_CHECKS:
             for square in self.enumerate_squares():
                 nb_zeros = list(self.grid[square]).count(0)
@@ -81,8 +81,12 @@ class Board:
             changed_squares.append(action.to)
             self.moves(action)
         for square in changed_squares:
-            self.resolve_square(square)
-        return self.calc_update(changed_squares)
+            res = self.resolve_square(square)
+        if not IA:
+            return self.calc_update(changed_squares)
+        else:
+            if not res is None:
+                return res
 
     def resolve_square(self, square):
         nb_zeros = list(self.grid[square]).count(0)
@@ -93,10 +97,28 @@ class Board:
             raise ValueError('impossible to resolve 3 races on one square')
         elif nb_zeros == 1:
             if self.grid[square][RACE_ID[HUM]] > 0:
-                attack_humans(self.current_player, self.grid[square])
+                a = attack_humans(self.current_player, self.grid[square])
+                if not a is None:
+                    board2 = self.copy()
+                    p1 = a[1]
+                    p2 = a[3]
+                    self.grid[square][RACE_ID[HUM]] = 0
+                    self.grid[square][RACE_ID[self.current_player]] = a[0]
+                    board2.grid[square][RACE_ID[HUM]] = a[2]
+                    board2.grid[square][RACE_ID[self.current_player]] = 0
+                    return self, p1, board2, p2
             else:
-                attack_monsters(self.current_player, self.grid[square])
-
+                a = attack_monsters(self.current_player, self.grid[square])
+                if not a is None:
+                    board2 = self.copy()
+                    p1 = a[1]
+                    p2 = a[3]
+                    self.grid[square][RACE_ID[HUM]] = 0
+                    self.grid[square][RACE_ID[self.current_player]] = a[0]
+                    enemy_race = WOLV if self.current_player == VAMP else VAMP
+                    board2.grid[square][RACE_ID[HUM]] = a[2]
+                    board2.grid[square][RACE_ID[enemy_race]] = 0
+                    return self, p1, board2, p2
 
 class Action:
     def __init__(self, from_square, to_square, number, race):
@@ -131,64 +153,85 @@ class Action:
         ])
 
 
-def attack_humans(attacker, square):
+def attack_humans(attacker, square, IA=False):
     units = square[RACE_ID[attacker]]
     enemies = square[RACE_ID[HUM]]
     if units/enemies >= 1:
         units += enemies
         enemies = 0
+        square[RACE_ID[attacker]] = units
+        square[RACE_ID[HUM]] = enemies
     else:
         p = units / (2 * enemies)
-        sort = random()
-        if sort > p:
-            units = 0
-            temp_en = 0
-            for i in range(enemies):
-                lives = random()
-                if lives < (1-p):
-                    temp_en +=1
-            enemies = int(temp_en)
+        if not IA:
+            sort = random()
+            if sort > p:
+                units = 0
+                temp_en = 0
+                for i in range(enemies):
+                    lives = random()
+                    if lives < (1-p):
+                        temp_en +=1
+                enemies = int(temp_en)
+            else:
+                units += enemies
+                temp_units = 0
+                for i in range(units):
+                    lives = random()
+                    if lives < p :
+                        temp_units +=1
+                units = int(temp_units)
+                enemies = 0
+            square[RACE_ID[attacker]] = units
+            square[RACE_ID[HUM]] = enemies
         else:
-            units += enemies
-            temp_units = 0
-            for i in range(units):
-                lives = random()
-                if lives < p :
-                    temp_units +=1
-            units = int(temp_units)
-            enemies = 0
-    square[RACE_ID[attacker]] = units
-    square[RACE_ID[HUM]] = enemies
+            if p < 0.1:
+                square[RACE_ID[attacker]] = 0
+                square[RACE_ID[HUM]] = (1-p)*enemies
+            else:
+                return int(p*units), p, int((1-p)*enemies), 1-p
 
 
-def attack_monsters(attacker, square):
+def attack_monsters(attacker, square, IA=False):
     units = square[RACE_ID[attacker]]
     enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
     #print('Enemies : {} {}'.format(enemy_race, enemies))
     if units/enemies >= 1.5:
         enemies = 0
+        square[RACE_ID[attacker]] = units
+        square[RACE_ID[enemy_race]] = enemies
     else:
         if units >= enemies:
             p = units / enemies - 0.5
         else:
             p = units / (2 * enemies)
-        sort = random()
-        if sort > p:  # defeat of attacker
-            units = 0
-            temp_en = 0
-            for i in range(units):
-                lives = random()
-                if lives < (1-p):
-                    temp_en += 1
-            enemies = int(temp_en)
+        if not IA:
+            sort = random()
+            if sort > p:  # defeat of attacker
+                units = 0
+                temp_en = 0
+                for i in range(units):
+                    lives = random()
+                    if lives < (1-p):
+                        temp_en += 1
+                enemies = int(temp_en)
+            else:
+                temp_unit = 0
+                for i in range(units):
+                    lives = random()
+                    if lives < p:
+                        temp_unit += 1
+                units = int(temp_unit)
+                enemies = 0
+            square[RACE_ID[attacker]] = units
+            square[RACE_ID[enemy_race]] = enemies
         else:
-            temp_unit = 0
-            for i in range(units):
-                lives = random()
-                if lives < p:
-                    temp_unit += 1
-            units = int(temp_unit)
-            enemies = 0
-    square[RACE_ID[attacker]] = units
-    square[RACE_ID[enemy_race]] = enemies
+            if p < 0.1:
+                square[RACE_ID[attacker]] = 0
+                square[RACE_ID[enemy_race]] = enemies
+            elif p > 0.9:
+                square[RACE_ID[attacker]] = units
+                square[RACE_ID[enemy_race]] = 0
+            else:
+                return int(p*units), p, int((1-p)*enemies), 1-p
