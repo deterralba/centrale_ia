@@ -97,3 +97,5 @@ ENV/
 # PyDev stuff:
 .project
 .pydevproject
+game.build/
+src/game.build/
