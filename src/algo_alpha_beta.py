@@ -2,11 +2,12 @@ import numpy as np
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 from algo_mini_max import evaluate, get_available_moves, add_to_transposition_table, from_numpy_to_tuple
-
+from time import sleep, time
 
 def alphabeta(board, race, race_ennemi, depth, transposition_table):
     '''without group division and only one action'''
 
+    start_time = time()
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
     actions = get_available_moves(board, race)  # return a list of possible actions
@@ -32,6 +33,8 @@ def alphabeta(board, race, race_ennemi, depth, transposition_table):
     print('='*40)
     print('action {}, score {}'.format(best_action, alpha))
     Board.SKIP_CHECKS = old_skip
+    print('time to return the action for alpha/beta : ')
+    print(time() - start_time)
     return [best_action]  # return a list with only one move for the moment
 
 
@@ -58,11 +61,7 @@ def min_play_alphabeta(board, race, race_ennemi, depth, transposition_table, alp
         if score < beta:
             beta = score
         if alpha >= beta:
-            print('alpha >= beta...')
-            print(alpha)
-            print('>=')
-            print(beta)
-            print('skipping calculation in min_play_alphabeta...')
+            print('alpha >= beta : ', alpha, ' >= ', beta, ' - skipping calculation in min_play_alphabeta...')
             return beta
     # print('min_score = ' + str(min_score))
     return beta
@@ -94,11 +93,7 @@ def max_play_alphabeta(board, race, race_ennemi, depth, transposition_table, alp
         if score > alpha:
             alpha = score
         if alpha >= beta:
-            print('alpha >= beta...')
-            print(alpha)
-            print('>=')
-            print(beta)
-            print('skipping calculation in max_play_alphabeta...')
+            print('alpha >= beta : ', alpha, ' >= ', beta, ' - skipping calculation in max_play_alphabeta...')
             return alpha
     # print('max_score = ' + str(max_score))
     return alpha
