@@ -2,22 +2,22 @@ from player import Player
 from algo_mini_max import minimax
 from random import random
 from threading import Thread, Lock
-from algo_mini_max import max_play, min_play, SafeCounter, get_available_moves
+from algo_mini_max import max_play, min_play, SafeCounter, get_available_moves, INF
 from board import Board
 from time import time
 
-INF = 10e9
 
-def f_maker(player, board, race, race_ennemi, depth, all_actions, counter):
+def f_maker(player, board, race, race_ennemi, depth, all_actions):
     def f(action):
+        counter = SafeCounter()
         counter.add_count()
         clone_board = board.copy()
         clone_board.current_player = race
         clone_board.do_actions([action])
         score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         player.set_best_move(action, score)
-        print('suggesting move ', score)
-        return (action, score)
+        #print('suggesting move ', score)
+        return (action, score, counter.get_count())
     return f
 
 class MapPlayer(Player):
@@ -39,12 +39,12 @@ class MapPlayer(Player):
 
         old_skip = Board.SKIP_CHECKS
         Board.SKIP_CHECKS = True
-        counter = SafeCounter()
         start_time = time()
+        counter = 0
 
         actions = get_available_moves(board, self.race)  # return a list of possible actions
         print('nb actions: {}'.format(len(actions)))
-        print('nb positions: {}'.format(counter.get_count()))
+        print('nb positions: {}'.format(counter))
         best_action = actions[0]
         all_actions = []
         best_score = -INF
@@ -52,42 +52,40 @@ class MapPlayer(Player):
         #from multiprocessing import Pool
         from pathos.multiprocessing import ProcessingPool as Pool
         pool = Pool()
-        pool.ncpus = 2
+        pool.ncpus = 8 # avoid error Pool not running, for a mystirious reason
 
-        f = f_maker(self, board, self.race, self.race_ennemi, self.depth, all_actions, counter)
-        print(actions)
+        f = f_maker(self, board, self.race, self.race_ennemi, self.depth, all_actions)
         result = pool.map(f, actions)
         #result = list(result)
         print('*' * 50)
-        print(result)
-        best_action, best_score = max(result, key=lambda x: x[1])
-        print(best_action, best_score)
-        print('.' * 40)
+        #print(result)
 
         pool.close()
         pool.join()
-        del pool
 
-        print(result)
-        best_action, best_score = max(result, key=lambda x: x[1])
-        print(best_action, best_score)
+        #print(result)
+        best_action, best_score, _ = max(result, key=lambda x: x[1])
+        #print(best_action, best_score)
         self.set_best_move(best_action, best_score)
+
+        for tup in result:
+            counter += tup[2]
 
         print('+' * 40)
         print('action {}, score {}'.format(best_action, best_score))
         Board.SKIP_CHECKS = old_skip
 
         end_time = time() - start_time
-        print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter.get_count(), end_time, counter.get_count() / end_time))
+        print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter, end_time, counter/end_time))
         return [self.get_best_move()]  # return a list with only one move for the moment
 
     def set_best_move(self, best_move, best_score):
-        print('setting best move with ? ', best_move)
+        #print('setting best move with ? ', best_move)
         if self._best_score is None or best_score > self._best_score:
             with self._lock:
                 self._best_move = best_move
                 self._best_score = best_score
-                print(self._best_move, self._best_score)
+                print('best_move is now', self._best_move, self._best_score)
 
     def get_best_move(self):
         with self._lock:
