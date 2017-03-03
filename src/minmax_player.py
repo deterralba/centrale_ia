@@ -9,8 +9,8 @@ from time import time
 INF = 10e9
 
 class SmartPlayer(Player):
-    def __init__(self, *args, depth=3):
-        super().__init__(*args)
+    def __init__(self, race, depth=3):
+        super(SmartPlayer, self).__init__(race)
         self.depth = depth
 
     def get_next_move(self, board):
@@ -18,8 +18,8 @@ class SmartPlayer(Player):
 
 
 class ThreadMMPlayer(Player):
-    def __init__(self, *args, depth=3, nb_thread=4):
-        super().__init__(*args)
+    def __init__(self, race, depth=3, nb_thread=4):
+        super(ThreadMMPlayer, self).__init__(race)
         self.depth = depth
         self.nb_thread = nb_thread # TODO update : not used
         self._best_move = None

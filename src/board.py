@@ -72,7 +72,8 @@ class Board:
             self.resolve_square(square)
 
     def resolve_square(self, square):
-        nb_zeros = list(self.grid[square]).count(0)
+        #nb_zeros = list(self.grid[square]).count(0)
+        nb_zeros = np.sum(self.grid[square] == 0)
         if nb_zeros >= 2:
             return
         elif nb_zeros == 0:

@@ -3,7 +3,7 @@ from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action
 
 
-class Player:
+class Player(object):
     def __init__(self, race):
         self.race = race
         self.race_ennemi = WOLV if self.race == VAMP else VAMP
