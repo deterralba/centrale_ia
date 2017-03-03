@@ -1,7 +1,7 @@
 from player import Player
 from algo_mini_max import minimax
 
-from threading import Thread
+from threading import Thread, Lock
 
 
 class SmartPlayer(Player):
@@ -18,13 +18,28 @@ class ThreadMMPlayer(Player):
         super().__init__(*args)
         self.depth = depth
         self.nb_thread = nb_thread
+        self._best_move = None
+        self._lock = Lock()
 
     def get_next_move(self, board, send_best_move=lambda move:None):
+        self._best_move = None
         threads = []
         for i in range(self.nb_thread):
-            thread = Thread(target=self.run, args=(i, send_best_move))
+            thread = Thread(
+                target=self.run,
+                args=(i, self.set_best_move)
+            )
             thread.start()
             threads.append(thread)
+
+    def set_best_move(best_move):
+        if best_move > self._best_move:
+            with self._lock:
+                self._best_move = best_move
+
+    def get_best_move():
+        with self._lock:
+            return self._best_move
 
     @staticmethod
     def run(thread_nb, send_best_move):
