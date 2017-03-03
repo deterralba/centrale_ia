@@ -3,6 +3,7 @@ from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 from time import sleep, time
 
+
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
     sum_ = np.sum(board.grid, axis=(0, 1))

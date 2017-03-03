@@ -38,7 +38,7 @@ if __name__ == '__main__':
     board = Board((4, 5), initial_pop)
     # MiniMaxPlayer.DEPTH = 3
     AlphaBetaPlayer.DEPTH = 3
-    player1 = AlphaBetaPlayer(VAMP, {})
-    player2 = AlphaBetaPlayer(WOLV, {})
+    player1 = AlphaBetaPlayer(VAMP)
+    player2 = AlphaBetaPlayer(WOLV)
     # player2 = RandomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))
