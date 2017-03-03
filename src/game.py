@@ -1,10 +1,11 @@
 from time import sleep, time
 from draw import start_GUI, draw
 from player import RamdomPlayer
-from minmax_player import SmartPlayer
+from alphabeta_player import SmartPlayer
 from const import HUM, WOLV, VAMP
 from board import Board
-
+from alphabeta import successors
+from algo_mini_max import evaluate
 
 def generate_play(player1, player2, board):
     def play(*args):
@@ -28,15 +29,24 @@ def generate_play(player1, player2, board):
 
 if __name__ == '__main__':
 
-    initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 4, WOLV: 0},
+    initial_pop = [{'x': 4, 'y': 2, HUM: 0, VAMP: 4, WOLV: 0},
                    {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
                    {'x': 3, 'y': 3, HUM: 0, VAMP: 0, WOLV: 1},
                    {'x': 3, 'y': 1, HUM: 3, VAMP: 0, WOLV: 0},
                    {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
-
+    
     board = Board((4, 5), initial_pop)
-    SmartPlayer.DEPTH = 5
+
+    i = 0
+    for a,s in successors(board, VAMP):
+        i += 1
+        j = 0
+        for b,t in successors(s, WOLV):
+            j += 1
+            print(i, "-", j, ":", evaluate(t,VAMP,WOLV))
+'''
+    SmartPlayer.DEPTH = 4
     player1 = SmartPlayer(VAMP)
     player2 = SmartPlayer(WOLV)
     #player2 = RamdomPlayer(WOLV)
-    start_GUI(board.grid, generate_play(player1, player2, board))
+    start_GUI(board.grid, generate_play(player1, player2, board))'''

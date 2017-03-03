@@ -1,4 +1,5 @@
 import socket
+import time
 
 
 class ComServer:
@@ -117,5 +118,11 @@ if __name__ == '__main__':
             print('BYE')
             break
         else:
+            #lancer timer
+            debut = time.time()
+            
             mvt = [[4, 3, 1, 4, 2]]
             com.send_mov(mvt)
+
+            #arrêter timer
+            print(time.time() - debut)
