@@ -18,6 +18,7 @@ def minimax(board, race, race_ennemi, depth):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
+
     actions = get_available_moves(board, race)  # return a list of possible actions
     print('nb actions: {}'.format(len(actions)))
     best_action = actions[0]
@@ -33,7 +34,9 @@ def minimax(board, race, race_ennemi, depth):
             best_score = score
     print('='*40)
     print('action {}, score {}'.format(best_action, best_score))
+
     Board.SKIP_CHECKS = old_skip
+
     return [best_action]  # return a list with only one move for the moment
 
 

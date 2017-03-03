@@ -1,6 +1,6 @@
 from time import sleep, time
 from draw import start_GUI, draw
-from player import RamdomPlayer
+from player import RandomPlayer
 from minmax_player import SmartPlayer
 from const import HUM, WOLV, VAMP
 from board import Board
@@ -35,8 +35,7 @@ if __name__ == '__main__':
                    {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
 
     board = Board((4, 5), initial_pop)
-    SmartPlayer.DEPTH = 5
-    player1 = SmartPlayer(VAMP)
-    player2 = SmartPlayer(WOLV)
-    #player2 = RamdomPlayer(WOLV)
+    player1 = SmartPlayer(VAMP, depth=2)
+    player2 = SmartPlayer(WOLV, depth=4)
+    #player2 = RandomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))

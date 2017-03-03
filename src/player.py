@@ -12,7 +12,7 @@ class Player:
         raise NotImplementedError()
 
 
-class RamdomPlayer(Player):
+class RandomPlayer(Player):
     def get_next_move(self, board):
         actions = []
         for square in board.enumerate_squares():
