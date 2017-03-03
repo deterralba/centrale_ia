@@ -84,7 +84,7 @@ class Board:
                 
     def switchRace(self):
         '''Switches the current player '''
-        current_player = player2 if current_player == player1 else player1
+        self.current_player = VAMP if self.current_player == WOLV else WOLV
 
 
 class Action:
