@@ -52,7 +52,10 @@ def minimax(board, race, race_ennemi, depth, transposition_table):
             if clone_grid in transposition_table.keys():
                 print('situation already encountered...skipping calculation thks to transposition_table...')
                 score = transposition_table[clone_grid]
-        else:
+                no_skip = False
+            else:
+                no_skip = True
+        if not TRANSPOSITION or no_skip:
             clone_board.current_player = race
             clone_board.do_actions([action])
             score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, transposition_table)
@@ -100,7 +103,10 @@ def min_play(board, race, race_ennemi, depth, all_actions, transposition_table):
             if clone_grid in transposition_table.keys():
                 print('situation already encountered...skipping calculation thks to transposition_table...')
                 score = transposition_table[clone_grid]
-        else:
+                no_skip = False
+            else:
+                no_skip = True
+        if not TRANSPOSITION or no_skip:
             clone_board.current_player = race_ennemi
             clone_board.do_actions([action])
             score = max_play(clone_board, race, race_ennemi, depth-1, all_actions, transposition_table)
@@ -137,7 +143,10 @@ def max_play(board, race, race_ennemi, depth, all_actions, transposition_table):
             if clone_grid in transposition_table.keys():
                 print('situation already encountered...skipping calculation thks to transposition_table...')
                 score = transposition_table[clone_grid]
-        else:
+                no_skip = False
+            else:
+                no_skip = True
+        if not TRANSPOSITION or no_skip:
             clone_board.current_player = race
             clone_board.do_actions([action])
             score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, transposition_table)
@@ -176,7 +185,7 @@ def add_to_transposition_table(transposition_table, grid, score):
     else:
         transposition_table[grid] = score
         # print('new grid successfully added to the TRANSPOSITION_TABLE : ')
-        print(grid, score)
+        #print(grid, score)
     return transposition_table
 
 

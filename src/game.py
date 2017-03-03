@@ -2,6 +2,7 @@ from time import sleep, time
 from draw import start_GUI, draw
 from player import RandomPlayer
 from smart_player import MiniMaxPlayer, AlphaBetaPlayer
+from minmax_player import SmartPlayer
 from const import HUM, WOLV, VAMP
 from board import Board
 
@@ -37,8 +38,10 @@ if __name__ == '__main__':
 
     board = Board((4, 5), initial_pop)
     # MiniMaxPlayer.DEPTH = 3
-    AlphaBetaPlayer.DEPTH = 3
-    player1 = AlphaBetaPlayer(VAMP)
-    player2 = AlphaBetaPlayer(WOLV)
+    #AlphaBetaPlayer.DEPTH = 3
+    #tplayer1 = AlphaBetaPlayer(VAMP)
+    player1 = SmartPlayer(VAMP, depth=5)
+    player2 = SmartPlayer(WOLV, depth=5)
+    #player2 = AlphaBetaPlayer(WOLV)
     # player2 = RandomPlayer(WOLV)
     start_GUI(board.grid, generate_play(player1, player2, board))
