@@ -81,6 +81,10 @@ class Board:
                 attack_humans(self.current_player, self.grid[square])
             else:
                 attack_monsters(self.current_player, self.grid[square])
+                
+    def switchRace(self):
+        '''Switches the current player '''
+        current_player = player2 if current_player == player1 else player1
 
 
 class Action:
@@ -117,6 +121,7 @@ class Action:
 
 
 def attack_humans(attacker, square):
+    print(attacker)
     units = square[RACE_ID[attacker]]
     enemies = square[RACE_ID[HUM]]
     if units/enemies >= 1:

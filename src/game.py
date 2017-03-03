@@ -22,7 +22,6 @@ def generate_play(player1, player2, board):
             draw(board.grid)
             #sleep(0.2)
             #pause = input()
-            current_player = player2 if current_player == player1 else player1
         print(board.is_over() + ' won!')
     return play
 
@@ -36,7 +35,8 @@ if __name__ == '__main__':
                    {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
     
     board = Board((4, 5), initial_pop)
-
+    board.current_player = VAMP
+    
     i = 0
     for a,s in successors(board, VAMP):
         i += 1
