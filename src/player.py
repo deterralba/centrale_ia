@@ -2,15 +2,18 @@ from random import randint
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action
 
+
 class Player:
-    def __init__(self, race):
+    def __init__(self, race, transposition_table=None):
         self.race = race
+        self.race_ennemi = WOLV if self.race == VAMP else VAMP
+        self.transposition_table = transposition_table if transposition_table is not None else {}
 
     def get_next_move(self, board):
         raise NotImplementedError()
 
 
-class RamdomPlayer(Player):
+class RandomPlayer(Player):
     def get_next_move(self, board):
         actions = []
         for square in board.enumerate_squares():

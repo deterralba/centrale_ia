@@ -3,18 +3,27 @@ import numpy as np
 from draw import start_GUI, draw
 from const import RACE_ID, HUM, WOLV, VAMP
 
-SKIP_CHECKS = False
 
 class ActionInvalidError(Exception):
     pass
 
+
 class Board:
-    def __init__(self, dimensions, initial_pop=None):
+    SKIP_CHECKS = False
+    def __init__(self, dimensions, initial_pop=None, grid=None):
         shape = (dimensions[0], dimensions[1], 3)
-        self.grid = np.zeros(shape, dtype=np.uint8)
+        if grid is not None:
+            self.grid = grid
+        else:
+            self.grid = np.zeros(shape, dtype=np.uint8)
         if initial_pop is not None:
             self.update_grid(initial_pop)
-        self.currentPlayer = None
+        self.current_player = None
+
+    def copy(self):
+        board = Board(self.grid.shape, grid=self.grid.copy())
+        board.current_player = self.current_player
+        return board
 
     def enumerate_squares(self):
         ''' Returns a generator iterating over the coordinates of the squares of the grid '''
@@ -25,13 +34,11 @@ class Board:
 
     def is_over(self):
         ''' Returns the winning race, or False if the game is not over '''
-        nb_w = 0
-        nb_v = 0
-        for square in self.enumerate_squares():
-            nb_v += self.grid[square][RACE_ID[VAMP]]
-            nb_w += self.grid[square][RACE_ID[WOLV]]
-            if nb_w and nb_v:
-                return False
+        sum_ = np.sum(self.grid, axis=(0, 1))
+        nb_w = sum_[RACE_ID[WOLV]]
+        nb_v = sum_[RACE_ID[VAMP]]
+        if nb_w and nb_v:
+            return False
         return VAMP*(bool(nb_v)) + WOLV*(bool(nb_w)) or HUM
 
     def update_grid(self, changed_squares):
@@ -45,18 +52,18 @@ class Board:
 
     def moves(self, action):
         ''' Moves the units, does not resolve any fight'''
-        if SKIP_CHECKS or action.is_valid(self):
+        if self.SKIP_CHECKS or action.is_valid(self):
             self.grid[action.from_][RACE_ID[action.race]] -= action.number
             self.grid[action.to][RACE_ID[action.race]] += action.number
         else:
             raise ActionInvalidError('action not valid: {}'.format(action))
 
     def do_actions(self, actions):
-        if not SKIP_CHECKS:
+        if not self.SKIP_CHECKS:
             for square in self.enumerate_squares():
                 nb_zeros = list(self.grid[square]).count(0)
                 if nb_zeros < 2:
-                    raise ValueError('Board is not consistant: several races in one square: {}: {}'.format(square, self.grid[square]))
+                    raise ValueError('Board is not consistent: several races in one square: {}: {}'.format(square, self.grid[square]))
         for action in actions:
             self.moves(action)
         for square in self.enumerate_squares():
@@ -67,12 +74,14 @@ class Board:
         if nb_zeros >= 2:
             return
         elif nb_zeros == 0:
+            print(self.grid)
             raise ValueError('impossible to resolve 3 races on one square')
         elif nb_zeros == 1:
             if self.grid[square][RACE_ID[HUM]] > 0:
-                attack_humans(self.currentPlayer, self.grid[square])
+                attack_humans(self.current_player, self.grid[square])
             else:
-                attack_monsters(self.currentPlayer, self.grid[square])
+                attack_monsters(self.current_player, self.grid[square])
+
 
 class Action:
     def __init__(self, from_square, to_square, number, race):
@@ -106,6 +115,7 @@ class Action:
             not actions or self.to not in [ac.from_ for ac in actions]
         ])
 
+
 def attack_humans(attacker, square):
     units = square[RACE_ID[attacker]]
     enemies = square[RACE_ID[HUM]]
@@ -125,11 +135,12 @@ def attack_humans(attacker, square):
     square[RACE_ID[attacker]] = units
     square[RACE_ID[HUM]] = enemies
 
+
 def attack_monsters(attacker, square):
     units = square[RACE_ID[attacker]]
     enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
-    print('Enemies : {} {}'.format(enemy_race, enemies))
+    #print('Enemies : {} {}'.format(enemy_race, enemies))
     if units/enemies >= 1.5:
         enemies = 0
     else:
