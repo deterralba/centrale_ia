@@ -1,8 +1,14 @@
 import numpy as np
+from time import time
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 
 INF = 10e9
+
+nb_iterations = 0
+def add_count():
+    global nb_iterations
+    nb_iterations += 1
 
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
@@ -21,12 +27,18 @@ def minimax(board, race, race_ennemi, depth):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
+
+    global nb_iterations
+    nb_iterations = 0
+    start_time = time()
+
     actions = get_available_moves(board, race)  # return a list of possible actions
     print('nb actions: {}'.format(len(actions)))
     best_action = actions[0]
     all_actions = []
     best_score = -INF
     for action in actions:
+        add_count()
         clone_board = board.copy()
         clone_board.current_player = race
         clone_board.do_actions([action])
@@ -48,6 +60,9 @@ def minimax(board, race, race_ennemi, depth):
         all_actions = [action for action in all_actions if action[2] == best_score]
         print('after filter')
         print('\n'.join(map(str, all_actions)))
+
+    end_time = time() - start_time
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(nb_iterations, end_time, nb_iterations/end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
@@ -63,6 +78,7 @@ def min_play(board, race, race_ennemi, depth, all_actions):
     best_action = actions[0]
     min_score = INF
     for action in actions:
+        add_count()
         clone_board = board.copy()
         clone_board.current_player = race_ennemi
         clone_board.do_actions([action])
@@ -92,6 +108,7 @@ def max_play(board, race, race_ennemi, depth, all_actions):
     best_action = actions[0]
     max_score = -INF
     for action in actions:
+        add_count()
         clone_board = board.copy()
         clone_board.current_player = race
         clone_board.do_actions([action])
