@@ -2,13 +2,16 @@ import numpy as np
 from time import time
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
+from threading import RLock
 
 INF = 10e9
 
-nb_iterations = 0
+_nb_iterations = 0
+_lock = RLock()
 def add_count():
     global nb_iterations
-    nb_iterations += 1
+    with _lock:
+        nb_iterations += 1
 
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
