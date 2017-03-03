@@ -1,12 +1,11 @@
 from time import sleep, time
-from draw import start_GUI, draw
 from player import RandomPlayer
-from minmax_player import SmartPlayer
+from minmax_player import SmartPlayer, ThreadMMPlayer
 from const import HUM, WOLV, VAMP
 from board import Board
 
 
-def generate_play(player1, player2, board):
+def generate_play(player1, player2, board, draw=lambda x: None):
     def play(*args):
         current_player = player1
         while not board.is_over():
@@ -27,6 +26,9 @@ def generate_play(player1, player2, board):
 
 
 if __name__ == '__main__':
+    GUI = False
+    if GUI:
+        from draw import start_GUI, draw
 
     initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 4, WOLV: 0},
                    {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
@@ -35,7 +37,11 @@ if __name__ == '__main__':
                    {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
 
     board = Board((4, 5), initial_pop)
-    player1 = SmartPlayer(VAMP, depth=2)
-    player2 = SmartPlayer(WOLV, depth=4)
+    player1 = ThreadMMPlayer(VAMP, depth=5)
+    player2 = SmartPlayer(WOLV, depth=5)
     #player2 = RandomPlayer(WOLV)
-    start_GUI(board.grid, generate_play(player1, player2, board))
+    if GUI:
+        start_GUI(board.grid, generate_play(player1, player2, board, draw))
+    else:
+        play = generate_play(player1, player2, board)
+        play()

@@ -6,12 +6,22 @@ from threading import RLock
 
 INF = 10e9
 
-_nb_iterations = 0
-_lock = RLock()
-def add_count():
-    global nb_iterations
-    with _lock:
-        nb_iterations += 1
+class SafeCounter:
+    def __init__(self):
+        self._nb_iterations = 0
+        self._lock = RLock()
+
+    def add_count(self):
+        with self._lock:
+            self._nb_iterations += 1
+
+    def get_count(self):
+        return self._nb_iterations
+
+    def reset_count(self):
+        with self._lock:
+            self._nb_iterations = 0
+            print('nb iterations reset: ', self._nb_iterations)
 
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
@@ -31,8 +41,7 @@ def minimax(board, race, race_ennemi, depth):
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
 
-    global nb_iterations
-    nb_iterations = 0
+    counter = SafeCounter()
     start_time = time()
 
     actions = get_available_moves(board, race)  # return a list of possible actions
@@ -41,11 +50,11 @@ def minimax(board, race, race_ennemi, depth):
     all_actions = []
     best_score = -INF
     for action in actions:
-        add_count()
+        counter.add_count()
         clone_board = board.copy()
         clone_board.current_player = race
         clone_board.do_actions([action])
-        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions)
+        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
         if score > best_score:
             best_action = action
             best_score = score
@@ -66,11 +75,11 @@ def minimax(board, race, race_ennemi, depth):
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
-    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(nb_iterations, end_time, nb_iterations/end_time))
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter.get_count(), end_time, counter.get_count()/end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
-def min_play(board, race, race_ennemi, depth, all_actions):
+def min_play(board, race, race_ennemi, depth, all_actions, counter):
     #print('entering min_play, depth {}'.format(depth))
     winning_race = board.is_over()
     if winning_race:
@@ -82,11 +91,11 @@ def min_play(board, race, race_ennemi, depth, all_actions):
     best_action = actions[0]
     min_score = INF
     for action in actions:
-        add_count()
+        counter.add_count()
         clone_board = board.copy()
         clone_board.current_player = race_ennemi
         clone_board.do_actions([action])
-        score = max_play(clone_board, race, race_ennemi, depth-1, all_actions)
+        score = max_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
         #print('score = ' + str(score))
         if score < min_score:
             min_score = score
@@ -100,7 +109,7 @@ def min_play(board, race, race_ennemi, depth, all_actions):
     return min_score
 
 
-def max_play(board, race, race_ennemi, depth, all_actions):
+def max_play(board, race, race_ennemi, depth, all_actions, counter):
     #print('entering max_play, depth {}'.format(depth))
     winning_race = board.is_over()
     if winning_race:
@@ -112,11 +121,11 @@ def max_play(board, race, race_ennemi, depth, all_actions):
     best_action = actions[0]
     max_score = -INF
     for action in actions:
-        add_count()
+        counter.add_count()
         clone_board = board.copy()
         clone_board.current_player = race
         clone_board.do_actions([action])
-        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions)
+        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
         #print('score = ' + str(score))
         if score > max_score:
             max_score = score
