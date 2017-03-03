@@ -2,17 +2,30 @@ import numpy as np
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 from time import sleep, time
+from threading import RLock
 
+TRANSPOSITION = True
+
+INF = 10e9
+
+_nb_iterations = 0
+_lock = RLock()
+def add_count():
+    global nb_iterations
+    with _lock:
+        nb_iterations += 1
 
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
     sum_ = np.sum(board.grid, axis=(0, 1))
     if sum_[RACE_ID[race]] == 0:
-        return float('-inf')
+        return -INF
     elif sum_[RACE_ID[race_ennemi]] == 0:
-        return float('inf')
+        return INF
     else:
-        return int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])
+        # evite la dispersion
+        dispersion = int(np.sum(board.grid[:,:,RACE_ID[race]] > 0))
+        return 50*(int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
 
 def minimax(board, race, race_ennemi, depth, transposition_table):
@@ -21,90 +34,124 @@ def minimax(board, race, race_ennemi, depth, transposition_table):
     start_time = time()
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
+
+    global nb_iterations
+    nb_iterations = 0
+    start_time = time()
+
     actions = get_available_moves(board, race)  # return a list of possible actions
     print('nb actions: {}'.format(len(actions)))
     best_action = actions[0]
-    best_score = float('-inf')
+    all_actions = []
+    best_score = -INF
     for action in actions:
-        print('action: {})'.format(action))
+        add_count()
         clone_board = board.copy()
-        clone_grid = from_numpy_to_tuple(clone_board)
-        if clone_grid in transposition_table.keys():
-            print('situation already encountered...skipping calculation thks to transposition_table...')
-            score = transposition_table[clone_grid]
+        if TRANSPOSITION:
+            clone_grid = from_numpy_to_tuple(clone_board)
+            if clone_grid in transposition_table.keys():
+                print('situation already encountered...skipping calculation thks to transposition_table...')
+                score = transposition_table[clone_grid]
         else:
             clone_board.current_player = race
             clone_board.do_actions([action])
-            score = min_play(clone_board, race, race_ennemi, depth, transposition_table)
-            transposition_table = add_to_transposition_table(transposition_table, clone_grid, score)
+            score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, transposition_table)
+            if TRANSPOSITION:
+                transposition_table = add_to_transposition_table(transposition_table, clone_grid, score)
         if score > best_score:
             best_action = action
             best_score = score
     print('='*40)
     print('action {}, score {}'.format(best_action, best_score))
     Board.SKIP_CHECKS = old_skip
-    print('time to return the action for minimax : ')
-    print(time() - start_time)
+
+    if False:
+        print('Action summary')
+        all_actions.append((best_action, depth, best_score))
+        all_actions.sort(key=lambda x: x[1], reverse=True)
+
+        print('before filter', all_actions)
+        print(best_score)
+        all_actions = [action for action in all_actions if action[2] == best_score]
+        print('after filter')
+        print('\n'.join(map(str, all_actions)))
+
+    end_time = time() - start_time
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(nb_iterations, end_time, nb_iterations/end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
-def min_play(board, race, race_ennemi, depth, transposition_table):
-    # print('entering min_play, depth {}'.format(depth))
+def min_play(board, race, race_ennemi, depth, all_actions, transposition_table):
+    #print('entering min_play, depth {}'.format(depth))
     winning_race = board.is_over()
     if winning_race:
-        return float('inf') if winning_race == race else float('-inf')
+        return INF if winning_race == race else -INF
     if depth == 0:
         return evaluate(board, race, race_ennemi)
 
     actions = get_available_moves(board, race_ennemi)
-    min_score = float('inf')
+    best_action = actions[0]
+    min_score = INF
     for action in actions:
+        add_count()
         clone_board = board.copy()
-        clone_grid = from_numpy_to_tuple(clone_board)
-        if clone_grid in transposition_table.keys():
-            print('situation already encountered...skipping calculation thks to transposition_table...')
-            score = transposition_table[clone_grid]
+        if TRANSPOSITION:
+            clone_grid = from_numpy_to_tuple(clone_board)
+            if clone_grid in transposition_table.keys():
+                print('situation already encountered...skipping calculation thks to transposition_table...')
+                score = transposition_table[clone_grid]
         else:
             clone_board.current_player = race_ennemi
             clone_board.do_actions([action])
-            score = max_play(clone_board, race, race_ennemi, depth-1, transposition_table)
+            score = max_play(clone_board, race, race_ennemi, depth-1, all_actions, transposition_table)
+            #TODO add to transopistion table ?
             # print('score = ' + str(score))
         if score < min_score:
             min_score = score
-            if min_score == float('-inf'):
-                # print('returning -inf')
+            best_action = action
+            if min_score <= -INF/2:
+                #print('returning -inf')
+                all_actions.append((action, depth, score))
                 return min_score
+    all_actions.append((best_action, depth, score))
     # print('min_score = ' + str(min_score))
     return min_score
 
 
-def max_play(board, race, race_ennemi, depth, transposition_table):
-    # print('entering max_play, depth {}'.format(depth))
+def max_play(board, race, race_ennemi, depth, all_actions, transposition_table):
+    #print('entering max_play, depth {}'.format(depth))
     winning_race = board.is_over()
     if winning_race:
-        return float('inf') if winning_race == race else float('-inf')
+        return INF if winning_race == race else -INF
     if depth == 0:
         return evaluate(board, race, race_ennemi)
 
     actions = get_available_moves(board, race)  # return a list of possible actions
-    max_score = float('-inf')
+    best_action = actions[0]
+    max_score = -INF
     for action in actions:
+        add_count()
         clone_board = board.copy()
-        clone_grid = from_numpy_to_tuple(clone_board)
-        if clone_grid in transposition_table.keys():
-            print('situation already encountered...skipping calculation thks to transposition_table...')
-            score = transposition_table[clone_grid]
+        if TRANSPOSITION:
+            clone_grid = from_numpy_to_tuple(clone_board)
+            if clone_grid in transposition_table.keys():
+                print('situation already encountered...skipping calculation thks to transposition_table...')
+                score = transposition_table[clone_grid]
         else:
             clone_board.current_player = race
             clone_board.do_actions([action])
-            score = min_play(clone_board, race, race_ennemi, depth-1, transposition_table)
+            score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, transposition_table)
+            #TODO add to transopistion table ?
             # print('score = ' + str(score))
         if score > max_score:
             max_score = score
-            if max_score == float('inf'):
-                # print('returning inf')
+            best_action = action
+            if max_score >= INF/2:
+                #print('returning inf')
+                all_actions.append((action, depth, score))
                 return max_score
-    # print('max_score = ' + str(max_score))
+    #print('max_score = ' + str(max_score))
+    all_actions.append((best_action, depth, score))
     return max_score
 
 

@@ -4,6 +4,8 @@ from draw import start_GUI, draw
 from const import RACE_ID, HUM, WOLV, VAMP
 
 
+RANDOM = False
+
 class ActionInvalidError(Exception):
     pass
 
@@ -92,7 +94,7 @@ class Action:
         self.race_ennemi = WOLV if self.race == VAMP else VAMP
 
     def __repr__(self):
-        return '{} {} {} {}'.format(self.from_, self.to, self.number, self.race)
+        return '{}: {}->{} w {}'.format(self.race, self.from_, self.to, self.number)
 
     @staticmethod
     def square_is_on_grid(square, grid):
@@ -124,7 +126,10 @@ def attack_humans(attacker, square):
         enemies = 0
     else:
         p = units / (2 * enemies)
-        sort = random()
+        if RANDOM:
+            sort = random()
+        else:
+            sort = 0.5
         if sort > p:
             units = 0
             enemies = int(enemies * (1-p))
@@ -148,7 +153,10 @@ def attack_monsters(attacker, square):
             p = units / enemies - 0.5
         else:
             p = units / (2 * enemies)
-        sort = random()
+        if RANDOM:
+            sort = random()
+        else:
+            sort = 0.5
         if sort > p:  # defeat of attacker
             units = 0
             enemies = int(enemies * (1-p))
