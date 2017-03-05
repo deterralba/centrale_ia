@@ -6,7 +6,7 @@ from algo_mini_max import SafeCounter, get_available_moves, _min_max
 from board import Board
 from time import time
 
-INF = 10e9
+from game import INF
 
 class SmartPlayer(Player):
     def __init__(self, race, depth=3):
