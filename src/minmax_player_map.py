@@ -7,18 +7,18 @@ from board import Board
 from time import time
 
 
-def f_maker(player, board, race, race_ennemi, depth, all_actions):
-    def f(action):
-        counter = SafeCounter()
-        counter.add_count()
-        clone_board = board.copy()
-        clone_board.current_player = race
-        clone_board.do_actions([action])
-        score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
-        player.set_best_move(action, score)
-        #print('suggesting move ', score)
-        return (action, score, counter.get_count())
-    return f
+def f(args):
+    action, board, race, race_ennemi, depth, all_actions = args
+    counter = SafeCounter()
+    counter.add_count()
+    clone_board = board.copy()
+    clone_board.current_player = race
+    clone_board.do_actions([action])
+    score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+    #player.set_best_move(action, score)
+    #print('suggesting move ', score)
+    return (action, score, counter.get_count())
+
 
 class MapPlayer(Player):
 
@@ -31,9 +31,9 @@ class MapPlayer(Player):
         self._lock = Lock()
 
     def get_next_move(self, board):
-        print('%'*50)
+        print('%' * 50)
         print(self.__class__.__name__)
-        print('%'*50)
+        print('%' * 50)
         self._best_move = None
         self._best_score = None
 
@@ -49,21 +49,25 @@ class MapPlayer(Player):
         all_actions = []
         best_score = -INF
 
-        #from multiprocessing import Pool
-        from pathos.multiprocessing import ProcessingPool as Pool
-        pool = Pool()
-        pool.ncpus = 8 # avoid error Pool not running, for a mystirious reason
+        args = []
+        for action in actions:
+            args.append((action, board, self.race, self.race_ennemi, self.depth, all_actions))
 
-        f = f_maker(self, board, self.race, self.race_ennemi, self.depth, all_actions)
-        result = pool.map(f, actions)
+        from multiprocessing import Pool
+        #from pathos.multiprocessing import ProcessingPool as Pool
+        #from multiprocess import Pool as Pool
+        pool = Pool()
+        #pool.ncpus = 8  # avoid error Pool not running, for a mystirious reason
+
+        result = pool.map(f, args)
         #result = list(result)
         print('*' * 50)
-        #print(result)
+        # print(result)
 
         pool.close()
         pool.join()
 
-        #print(result)
+        # print(result)
         best_action, best_score, _ = max(result, key=lambda x: x[1])
         #print(best_action, best_score)
         self.set_best_move(best_action, best_score)
@@ -76,7 +80,7 @@ class MapPlayer(Player):
         Board.SKIP_CHECKS = old_skip
 
         end_time = time() - start_time
-        print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter, end_time, counter/end_time))
+        print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter, end_time, counter / end_time))
         return [self.get_best_move()]  # return a list with only one move for the moment
 
     def set_best_move(self, best_move, best_score):

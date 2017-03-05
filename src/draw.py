@@ -1,7 +1,7 @@
 import numpy as np
 from const import HUM, WOLV, VAMP
 
-SQUARE_SIZE = 40
+SQUARE_SIZE = 60
 
 def draw_square(canvas, l, c, people):
     global SQUARE_SIZE
