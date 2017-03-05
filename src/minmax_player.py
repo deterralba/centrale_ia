@@ -2,7 +2,7 @@ from player import Player
 from algo_mini_max import minimax
 from random import random
 from threading import Thread, Lock
-from algo_mini_max import max_play, min_play, SafeCounter, get_available_moves
+from algo_mini_max import SafeCounter, get_available_moves, _min_max
 from board import Board
 from time import time
 
@@ -85,7 +85,7 @@ class ThreadMMPlayer(Player):
         clone_board = board.copy()
         clone_board.current_player = race
         clone_board.do_actions([action])
-        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
+        score = _min_max(False, clone_board, race, race_ennemi, depth-1, all_actions, counter)
         print('suggesting move ', score, thread_nb)
         player.set_best_move(action, score)
 

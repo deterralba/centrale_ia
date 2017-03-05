@@ -6,6 +6,7 @@ from threading import RLock
 
 INF = 10e9
 
+
 class SafeCounter:
 
     def __init__(self):
@@ -37,11 +38,13 @@ def evaluate(board, race, race_ennemi):
         dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
         return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
+
 def clone_and_apply_actions(board, actions, race):
     clone_board = board.copy()
     clone_board.current_player = race
     clone_board.do_actions(actions)
     return clone_board
+
 
 def minimax(board, race, race_ennemi, depth, transposition_table=None):
     '''without group division and only one action'''
@@ -62,6 +65,7 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
     for action in actions:
         counter.add_count()
         clone_board = clone_and_apply_actions(board, [action], race)
+        #score = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         if score > best_score:
             best_action = action
@@ -107,11 +111,9 @@ def min_play(board, race, race_ennemi, depth, all_actions, counter):
             min_score = score
             best_action = action
             if min_score <= -INF / 2:
-                #print('returning -inf')
-                all_actions.append((action, depth, score))
-                return min_score
+                break
     #print('min_score = ' + str(min_score))
-    all_actions.append((best_action, depth, score))
+    all_actions.append((best_action, depth, min_score))
     return min_score
 
 
@@ -135,12 +137,37 @@ def max_play(board, race, race_ennemi, depth, all_actions, counter):
             max_score = score
             best_action = action
             if max_score >= INF / 2:
-                #print('returning inf')
-                all_actions.append((action, depth, score))
-                return max_score
+                break
     #print('max_score = ' + str(max_score))
-    all_actions.append((best_action, depth, score))
+    all_actions.append((best_action, depth, max_score))
     return max_score
+
+
+def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
+    winning_race = board.is_over()
+    if winning_race:
+        return INF if winning_race == race else -INF
+    if depth == 0:
+        return evaluate(board, race, race_ennemi)
+
+    actions = get_available_moves(board, race)  # return a list of possible actions
+    best_action = actions[0]
+    extrem_score = -INF if is_max else INF
+    for action in actions:
+        counter.add_count()
+        clone_board = clone_and_apply_actions(board, [action], race)
+        score = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+        #print('score = ' + str(score))
+        if (is_max and score > extrem_score) \
+                or (not is_max and score < extrem_score):
+            extrem_score = score
+            best_action = action
+            if (is_max and extrem_score >= INF / 2) \
+                    or (not is_max and extrem_score <= - INF / 2):
+                break
+    #print('max_score = ' + str(max_score))
+    all_actions.append((best_action, depth, extrem_score))
+    return extrem_score
 
 
 def get_available_moves(board, race):
