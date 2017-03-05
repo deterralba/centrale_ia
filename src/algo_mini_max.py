@@ -106,7 +106,8 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter, tran
         if not skip_min_max:
             _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter, transposition_table)
             if TRANSPOSITION:
-                transposition_table[clone_grid] = score
+                if depth == transposition_table['depth']:
+                    transposition_table[clone_grid] = score
 
         #print('score = ' + str(score))
         if is_max:
