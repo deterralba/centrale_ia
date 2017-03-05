@@ -60,22 +60,6 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
 
     all_actions = []
     best_score, best_action = _min_max(True, board, race, race_ennemi, depth - 0, all_actions, counter)
-    '''
-    actions = get_available_moves(board, race)  # return a list of possible actions
-    print('nb actions: {}'.format(len(actions)))
-    best_action = actions[0]
-    best_score = -INF
-    for action in actions:
-        counter.add_count()
-        clone_board = clone_and_apply_actions(board, [action], race)
-        score, _ = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
-        #score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
-        if score > best_score:
-            best_action = action
-            best_score = score
-            if best_score >= INF/2:
-                break
-    '''
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
