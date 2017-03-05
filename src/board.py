@@ -1,10 +1,9 @@
 from random import random
 import numpy as np
-from draw import start_GUI, draw
 from const import RACE_ID, HUM, WOLV, VAMP
 
+from game import RANDOM_MATCH_OUTPUT
 
-RANDOM = False
 
 class ActionInvalidError(Exception):
     pass
@@ -12,6 +11,7 @@ class ActionInvalidError(Exception):
 
 class Board:
     SKIP_CHECKS = False
+
     def __init__(self, dimensions, initial_pop=None, grid=None):
         shape = (dimensions[0], dimensions[1], 3)
         if grid is not None:
@@ -41,7 +41,7 @@ class Board:
         nb_v = sum_[RACE_ID[VAMP]]
         if nb_w and nb_v:
             return False
-        return VAMP*(bool(nb_v)) + WOLV*(bool(nb_w)) or HUM
+        return VAMP * (bool(nb_v)) + WOLV * (bool(nb_w)) or HUM
 
     def update_grid(self, changed_squares):
         for square in changed_squares:
@@ -65,7 +65,9 @@ class Board:
             for square in self.enumerate_squares():
                 nb_zeros = list(self.grid[square]).count(0)
                 if nb_zeros < 2:
-                    raise ValueError('Board is not consistent: several races in one square: {}: {}'.format(square, self.grid[square]))
+                    raise ValueError(
+                        'Board is not consistent: several races in one square: {}: {}'.format(
+                            square, self.grid[square]))
         for action in actions:
             self.moves(action)
         for square in self.enumerate_squares():
@@ -87,6 +89,7 @@ class Board:
 
 
 class Action:
+
     def __init__(self, from_square, to_square, number, race):
         self.from_ = from_square
         self.to = to_square
@@ -100,8 +103,8 @@ class Action:
     @staticmethod
     def square_is_on_grid(square, grid):
         return all([
-            0 <= square[0] < grid.shape[0], # line played <= number of lines
-            0 <= square[1] < grid.shape[1], # column played <= number of columns
+            0 <= square[0] < grid.shape[0],  # line played <= number of lines
+            0 <= square[1] < grid.shape[1],  # column played <= number of columns
         ])
 
     def is_valid(self, board, actions=None):
@@ -113,8 +116,8 @@ class Action:
             self.from_ != self.to,
             self.race in [VAMP, WOLV],
             Action.square_is_on_grid(self.to, board.grid),
-            Action.square_is_on_grid(self.from_, board.grid) and \
-                0 < self.number <= board.grid[self.from_][RACE_ID[self.race]],
+            Action.square_is_on_grid(self.from_, board.grid) and
+            0 < self.number <= board.grid[self.from_][RACE_ID[self.race]],
             not actions or self.to not in [ac.from_ for ac in actions]
         ])
 
@@ -122,21 +125,21 @@ class Action:
 def attack_humans(attacker, square):
     units = square[RACE_ID[attacker]]
     enemies = square[RACE_ID[HUM]]
-    if units/enemies >= 1:
+    if units / enemies >= 1:
         units += enemies
         enemies = 0
     else:
         p = units / (2 * enemies)
-        if RANDOM:
+        if RANDOM_MATCH_OUTPUT:
             sort = random()
         else:
             sort = 0.5
         if sort > p:
             units = 0
-            enemies = int(enemies * (1-p))
+            enemies = int(enemies * (1 - p))
         else:
             units += enemies
-            units = int(p*units)
+            units = int(p * units)
             enemies = 0
     square[RACE_ID[attacker]] = units
     square[RACE_ID[HUM]] = enemies
@@ -147,22 +150,22 @@ def attack_monsters(attacker, square):
     enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
     #print('Enemies : {} {}'.format(enemy_race, enemies))
-    if units/enemies >= 1.5:
+    if units / enemies >= 1.5:
         enemies = 0
     else:
         if units >= enemies:
             p = units / enemies - 0.5
         else:
             p = units / (2 * enemies)
-        if RANDOM:
+        if RANDOM_MATCH_OUTPUT:
             sort = random()
         else:
             sort = 0.5
         if sort > p:  # defeat of attacker
             units = 0
-            enemies = int(enemies * (1-p))
+            enemies = int(enemies * (1 - p))
         else:
-            units = int(p*units)
+            units = int(p * units)
             enemies = 0
     square[RACE_ID[attacker]] = units
     square[RACE_ID[enemy_race]] = enemies

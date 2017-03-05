@@ -4,8 +4,7 @@ from const import RACE_ID
 from board import Action, Board
 from threading import RLock
 
-INF = 10e9
-TRANSPOSITION = False
+from game import TRANSPOSITION, INF
 
 
 class SafeCounter:
@@ -78,7 +77,7 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
-    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_counter, end_time, total_counter/ end_time))
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_counter, end_time, total_counter / end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
@@ -110,7 +109,7 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
                 extrem_score = score
                 best_action = action
                 if extrem_score <= - INF / 2:
-                    break    #print('max_score = ' + str(max_score))
+                    break  # print('max_score = ' + str(max_score))
     all_actions.append((best_action, depth, extrem_score))
     return best_action, extrem_score, counter
 

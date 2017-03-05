@@ -54,7 +54,7 @@ class MapPlayer(Player):
         #from pathos.multiprocessing import ProcessingPool as Pool
         #from multiprocess import Pool as Pool
         pool = Pool()
-        #pool.ncpus = 8  # avoid error Pool not running, for a mystirious reason
+        # pool.ncpus = 8  # avoid error Pool not running, for a mystirious reason
 
         result = pool.map(f, args)
         #result = list(result)
@@ -64,7 +64,7 @@ class MapPlayer(Player):
         pool.close()
         pool.join()
 
-        #print(result)
+        # print(result)
         best_action, best_score, _ = max(result, key=lambda x: x[1])
         #print(best_action, best_score)
         self.set_best_move(best_action, best_score)
