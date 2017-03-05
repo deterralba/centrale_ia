@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     board = Board((4, 5), initial_pop)
 
-    #player1 = MapPlayer(VAMP, depth=3)
+    #player1 = MapPlayer(VAMP, depth=4)
     player1 = SmartPlayer(VAMP, depth=4)
 
     #player2 = MapPlayer(WOLV, depth=0)

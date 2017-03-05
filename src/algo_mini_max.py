@@ -57,10 +57,9 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
 
     start_time = time()
 
-    counter = SafeCounter()
+    counter = 0
     all_actions = []
-    best_action, best_score, counter = _min_max(True, board, race, race_ennemi, depth, all_actions, counter)
-    total_count = counter.get_count()
+    best_action, best_score, total_counter = _min_max(True, board, race, race_ennemi, depth, all_actions, counter)
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
@@ -79,7 +78,7 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
-    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_count, end_time, total_count / end_time))
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_counter, end_time, total_counter/ end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
@@ -87,12 +86,9 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     winning_race = board.is_over()
     if winning_race:
         score = INF if winning_race == race else -INF
-        return None, score, counter.add_count()
+        return None, score, counter + 1
     if depth == 0:
-        return None, evaluate(board, race, race_ennemi), counter.add_count()
-    if counter is None:
-        print('creatung counter')
-        counter = SafeCounter()
+        return None, evaluate(board, race, race_ennemi), counter + 1
 
     playing_race = race if is_max else race_ennemi
 
@@ -101,7 +97,7 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     extrem_score = -INF if is_max else INF
     for action in actions:
         clone_board = clone_and_apply_actions(board, [action], playing_race)
-        _, score, _ = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+        _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         #print('score = ' + str(score))
         if is_max:
             if score > extrem_score:

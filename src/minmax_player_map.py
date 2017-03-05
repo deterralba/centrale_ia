@@ -15,7 +15,7 @@ def f(args):
     _, score, total_counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, 0)
     #player.set_best_move(action, score)
     #print('suggesting move ', score)
-    print('total counter', total_counter)
+    #print('total counter', total_counter)
     return (action, score, total_counter)
 
 
@@ -42,7 +42,6 @@ class MapPlayer(Player):
 
         actions = get_available_moves(board, self.race)  # return a list of possible actions
         print('nb actions: {}'.format(len(actions)))
-        print('nb positions: {}'.format(counter))
         best_action = actions[0]
         all_actions = []
         best_score = -INF
@@ -65,7 +64,7 @@ class MapPlayer(Player):
         pool.close()
         pool.join()
 
-        print(result)
+        #print(result)
         best_action, best_score, _ = max(result, key=lambda x: x[1])
         #print(best_action, best_score)
         self.set_best_move(best_action, best_score)
