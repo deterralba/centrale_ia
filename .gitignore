@@ -99,3 +99,4 @@ ENV/
 .pydevproject
 game.build/
 src/game.build/
+src/temp
