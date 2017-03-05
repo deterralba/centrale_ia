@@ -9,23 +9,21 @@ from time import time
 
 def f(args):
     action, board, race, race_ennemi, depth, all_actions = args
-    counter = SafeCounter()
-    counter.add_count()
     clone_board = board.copy()
     clone_board.current_player = race
     clone_board.do_actions([action])
-    score, _ = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+    _, score, total_counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, 0)
     #player.set_best_move(action, score)
     #print('suggesting move ', score)
-    return (action, score, counter.get_count())
+    print('total counter', total_counter)
+    return (action, score, total_counter)
 
 
 class MapPlayer(Player):
 
-    def __init__(self, race, depth=3, nb_thread=4):
+    def __init__(self, race, depth=3):
         super(MapPlayer, self).__init__(race)
         self.depth = depth
-        self.nb_thread = nb_thread  # TODO update : not used
         self._best_move = None
         self._best_score = None
         self._lock = Lock()
@@ -67,7 +65,7 @@ class MapPlayer(Player):
         pool.close()
         pool.join()
 
-        # print(result)
+        print(result)
         best_action, best_score, _ = max(result, key=lambda x: x[1])
         #print(best_action, best_score)
         self.set_best_move(best_action, best_score)
@@ -99,7 +97,7 @@ class MapPlayer(Player):
 if __name__ == '__main__':
     from const import RACE_ID, HUM, WOLV, VAMP
 
-    p1 = ThreadMMPlayer(WOLV, depth=3, nb_thread=5)
+    p1 = ThreadMMPlayer(WOLV, depth=3)
     p1.get_next_move(None)
     print(p1.get_best_move())
     import time

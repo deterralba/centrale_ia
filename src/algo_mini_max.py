@@ -55,11 +55,12 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
     if TRANSPOSITION:
         assert transposition_table is not None
 
-    counter = SafeCounter()
     start_time = time()
 
+    counter = SafeCounter()
     all_actions = []
-    best_score, best_action = _min_max(True, board, race, race_ennemi, depth - 0, all_actions, counter)
+    best_action, best_score, counter = _min_max(True, board, race, race_ennemi, depth, all_actions, counter)
+    total_count = counter.get_count()
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
@@ -78,16 +79,20 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
-    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter.get_count(), end_time, counter.get_count() / end_time))
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_count, end_time, total_count / end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
 def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     winning_race = board.is_over()
     if winning_race:
-        return INF if winning_race == race else -INF, None
+        score = INF if winning_race == race else -INF
+        return None, score, counter.add_count()
     if depth == 0:
-        return evaluate(board, race, race_ennemi), None
+        return None, evaluate(board, race, race_ennemi), counter.add_count()
+    if counter is None:
+        print('creatung counter')
+        counter = SafeCounter()
 
     playing_race = race if is_max else race_ennemi
 
@@ -95,9 +100,8 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     best_action = actions[0]
     extrem_score = -INF if is_max else INF
     for action in actions:
-        counter.add_count()
         clone_board = clone_and_apply_actions(board, [action], playing_race)
-        score, _ = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+        _, score, _ = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         #print('score = ' + str(score))
         if is_max:
             if score > extrem_score:
@@ -112,7 +116,7 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
                 if extrem_score <= - INF / 2:
                     break    #print('max_score = ' + str(max_score))
     all_actions.append((best_action, depth, extrem_score))
-    return extrem_score, best_action
+    return best_action, extrem_score, counter
 
 
 def get_available_moves(board, race):
