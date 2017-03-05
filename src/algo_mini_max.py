@@ -5,6 +5,7 @@ from board import Action, Board
 from threading import RLock
 
 INF = 10e9
+TRANSPOSITION = False
 
 
 class SafeCounter:
@@ -65,8 +66,8 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
     for action in actions:
         counter.add_count()
         clone_board = clone_and_apply_actions(board, [action], race)
-        #score = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
-        score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+        score = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+        #score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         if score > best_score:
             best_action = action
             best_score = score
@@ -150,22 +151,27 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     if depth == 0:
         return evaluate(board, race, race_ennemi)
 
-    actions = get_available_moves(board, race)  # return a list of possible actions
+    playing_race = race if is_max else race_ennemi
+    actions = get_available_moves(board, playing_race)  # return a list of possible actions
     best_action = actions[0]
     extrem_score = -INF if is_max else INF
     for action in actions:
         counter.add_count()
-        clone_board = clone_and_apply_actions(board, [action], race)
+        clone_board = clone_and_apply_actions(board, [action], playing_race)
         score = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         #print('score = ' + str(score))
-        if (is_max and score > extrem_score) \
-                or (not is_max and score < extrem_score):
-            extrem_score = score
-            best_action = action
-            if (is_max and extrem_score >= INF / 2) \
-                    or (not is_max and extrem_score <= - INF / 2):
-                break
-    #print('max_score = ' + str(max_score))
+        if is_max:
+            if score > extrem_score:
+                extrem_score = score
+                best_action = action
+                if extrem_score >= INF / 2:
+                    break
+        else:
+            if score < extrem_score:
+                extrem_score = score
+                best_action = action
+                if extrem_score <= - INF / 2:
+                    break    #print('max_score = ' + str(max_score))
     all_actions.append((best_action, depth, extrem_score))
     return extrem_score
 
