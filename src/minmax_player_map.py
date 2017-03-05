@@ -14,7 +14,7 @@ def f(args):
     clone_board = board.copy()
     clone_board.current_player = race
     clone_board.do_actions([action])
-    score = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+    score, _ = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
     #player.set_best_move(action, score)
     #print('suggesting move ', score)
     return (action, score, counter.get_count())

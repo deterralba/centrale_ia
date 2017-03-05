@@ -44,7 +44,7 @@ if __name__ == '__main__':
     player2 = SmartPlayer(WOLV, depth=4)
     #player2 = RandomPlayer(WOLV)
 
-    GUI = True
+    GUI = False
     if GUI:
         from draw import start_GUI, draw
         start_GUI(board.grid, generate_play(player1, player2, board, draw))
