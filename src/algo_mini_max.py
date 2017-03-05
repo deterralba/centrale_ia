@@ -1,12 +1,13 @@
 import numpy as np
-from time import time
-from const import RACE_ID, HUM, WOLV, VAMP
+from time import time, sleep
+from const import RACE_ID
 from board import Action, Board
 from threading import RLock
 
 INF = 10e9
 
 class SafeCounter:
+
     def __init__(self):
         self._nb_iterations = 0
         self._lock = RLock()
@@ -23,6 +24,7 @@ class SafeCounter:
             self._nb_iterations = 0
             print('nb iterations reset: ', self._nb_iterations)
 
+
 def evaluate(board, race, race_ennemi):
     '''heuristic function'''
     sum_ = np.sum(board.grid, axis=(0, 1))
@@ -32,14 +34,22 @@ def evaluate(board, race, race_ennemi):
         return INF
     else:
         # evite la dispersion
-        dispersion = int(np.sum(board.grid[:,:,RACE_ID[race]] > 0))
-        return 50*(int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
+        dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
+        return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
+def clone_and_apply_actions(board, actions, race):
+    clone_board = board.copy()
+    clone_board.current_player = race
+    clone_board.do_actions(actions)
+    return clone_board
 
-def minimax(board, race, race_ennemi, depth):
+def minimax(board, race, race_ennemi, depth, transposition_table=None):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
+
+    if TRANSPOSITION:
+        assert transposition_table is not None
 
     counter = SafeCounter()
     start_time = time()
@@ -51,14 +61,12 @@ def minimax(board, race, race_ennemi, depth):
     best_score = -INF
     for action in actions:
         counter.add_count()
-        clone_board = board.copy()
-        clone_board.current_player = race
-        clone_board.do_actions([action])
-        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
+        clone_board = clone_and_apply_actions(board, [action], race)
+        score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         if score > best_score:
             best_action = action
             best_score = score
-    print('='*40)
+    print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
 
     Board.SKIP_CHECKS = old_skip
@@ -75,7 +83,7 @@ def minimax(board, race, race_ennemi, depth):
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
-    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter.get_count(), end_time, counter.get_count()/end_time))
+    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(counter.get_count(), end_time, counter.get_count() / end_time))
     return [best_action]  # return a list with only one move for the moment
 
 
@@ -92,15 +100,13 @@ def min_play(board, race, race_ennemi, depth, all_actions, counter):
     min_score = INF
     for action in actions:
         counter.add_count()
-        clone_board = board.copy()
-        clone_board.current_player = race_ennemi
-        clone_board.do_actions([action])
-        score = max_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
+        clone_board = clone_and_apply_actions(board, [action], race_ennemi)
+        score = max_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         #print('score = ' + str(score))
         if score < min_score:
             min_score = score
             best_action = action
-            if min_score <= -INF/2:
+            if min_score <= -INF / 2:
                 #print('returning -inf')
                 all_actions.append((action, depth, score))
                 return min_score
@@ -122,15 +128,13 @@ def max_play(board, race, race_ennemi, depth, all_actions, counter):
     max_score = -INF
     for action in actions:
         counter.add_count()
-        clone_board = board.copy()
-        clone_board.current_player = race
-        clone_board.do_actions([action])
-        score = min_play(clone_board, race, race_ennemi, depth-1, all_actions, counter)
+        clone_board = clone_and_apply_actions(board, [action], race)
+        score = min_play(clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         #print('score = ' + str(score))
         if score > max_score:
             max_score = score
             best_action = action
-            if max_score >= INF/2:
+            if max_score >= INF / 2:
                 #print('returning inf')
                 all_actions.append((action, depth, score))
                 return max_score
@@ -147,9 +151,8 @@ def get_available_moves(board, race):
         units = board.grid[square][RACE_ID[race]]
         if units > 0:
             possibles_to = [
-                (square[0] + i , square[1] + j) for i in range(-1, 2) for j in range(-1, 2)
+                (square[0] + i, square[1] + j) for i in range(-1, 2) for j in range(-1, 2)
                 if (i != 0 or j != 0) and Action.square_is_on_grid((square[0] + i, square[1] + j), board.grid)
             ]
             actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
-
