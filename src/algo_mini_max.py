@@ -65,15 +65,15 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
 
     Board.SKIP_CHECKS = old_skip
 
-    if False:
+    if True:
         print('Action summary')
-        all_actions.append((best_action, depth, best_score))
-        all_actions.sort(key=lambda x: x[1], reverse=True)
+        #all_actions.append((best_action, depth, best_score))
 
-        print('before filter', all_actions)
+        #print('before filter', all_actions)
         print(best_score)
         all_actions = [action for action in all_actions if action[2] == best_score]
-        print('after filter')
+        all_actions.sort(key=lambda x: x[1], reverse=True)
+        #print('after filter')
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
@@ -140,11 +140,27 @@ def get_available_moves(board, race):
             actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
 
-def from_numpy_to_tuple(board):
-    '''return a list of tuple with five elements : the square (2) and the number of humans, vampires
-    and wolves respectively'''
-    res = []
-    for square in board.enumerate_squares():
-        res.append((square[0], square[1], board.grid[square][RACE_ID[HUM]], board.grid[square][RACE_ID[VAMP]],
-                    board.grid[square][RACE_ID[WOLV]]))
-    return tuple(res)
+SERIALIZE_TUPLE = False
+if SERIALIZE_TUPLE:
+    def from_numpy_to_tuple(board):
+        '''return a list of tuple with five elements : the square (2) and the number of humans, vampires
+        and wolves respectively'''
+        res = []
+        for square in board.enumerate_squares():
+            res.append((square[0], square[1], board.grid[square][RACE_ID[HUM]], board.grid[square][RACE_ID[VAMP]],
+                        board.grid[square][RACE_ID[WOLV]]))
+        return tuple(res)
+else:
+    def from_numpy_to_tuple(board):
+        '''return a list of tuple with five elements : the square (2) and the number of humans, vampires
+        and wolves respectively'''
+        res = []
+        indexes = np.where(board.grid > 0)
+        array_x, array_y, array_race = indexes
+        for i, x in enumerate(array_x):
+            y = array_y[i]
+            race = array_race[i]
+            nb = board.grid[x, y, race]
+            t = (x, y, race, nb)
+            res.append(t)
+        return tuple(res)
