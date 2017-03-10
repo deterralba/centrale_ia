@@ -69,9 +69,13 @@ class Board:
                     raise ValueError(
                         'Board is not consistent: several races in one square: {}: {}'.format(
                             square, self.grid[square]))
+
+        changed_squares = []
         for action in actions:
+            changed_squares.append(action.from_)
+            changed_squares.append(action.to)
             self.moves(action)
-        for square in self.enumerate_squares():
+        for square in changed_squares:
             self.resolve_square(square)
 
     def resolve_square(self, square):
