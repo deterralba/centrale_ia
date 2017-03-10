@@ -63,6 +63,7 @@ class Board:
     def do_actions(self, actions):
         if not self.SKIP_CHECKS:
             for square in self.enumerate_squares():
+                # TODO use np.count_nonzero
                 nb_zeros = list(self.grid[square]).count(0)
                 if nb_zeros < 2:
                     raise ValueError(
@@ -76,6 +77,7 @@ class Board:
     def resolve_square(self, square):
         #nb_zeros = list(self.grid[square]).count(0)
         nb_zeros = np.sum(self.grid[square] == 0)
+        #nb_zeros = np.count_nonzero(self.grid[square]) # TODO update code to make this works
         if nb_zeros >= 2:
             return
         elif nb_zeros == 0:
