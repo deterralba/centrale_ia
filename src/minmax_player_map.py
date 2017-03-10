@@ -1,5 +1,6 @@
 from player import Player
 from algo_mini_max import minimax
+from algo_alpha_beta import _alpha_beta
 from random import random
 from threading import Thread, Lock
 from algo_mini_max import SafeCounter, get_available_moves, INF, _min_max
@@ -7,7 +8,18 @@ from board import Board
 from time import time
 
 
-def f(args):
+def alphabeta_f(args):
+    action, board, race, race_ennemi, depth, all_actions = args
+    clone_board = board.copy()
+    clone_board.current_player = race
+    clone_board.do_actions([action])
+    alpha = -INF
+    beta = INF
+    _, score, total_counter = _alpha_beta(False, clone_board, race, race_ennemi, depth - 1, all_actions, 0, alpha, beta)
+    return (action, score, total_counter)
+
+
+def minmax_f(args):
     action, board, race, race_ennemi, depth, all_actions = args
     clone_board = board.copy()
     clone_board.current_player = race
@@ -21,9 +33,11 @@ def f(args):
 
 class MapPlayer(Player):
 
-    def __init__(self, race, depth=3):
+    def __init__(self, race, depth=3, type='minmax'):
+        assert type in ['minmax', 'alphabeta']
         super(MapPlayer, self).__init__(race)
         self.depth = depth
+        self.type = type
         self._best_move = None
         self._best_score = None
         self._lock = Lock()
@@ -56,8 +70,11 @@ class MapPlayer(Player):
         pool = Pool()
         # pool.ncpus = 8  # avoid error Pool not running, for a mystirious reason
 
-        result = pool.map(f, args)
-        #result = list(result)
+        if self.type == 'minmax':
+            result = pool.map(minmax_f, args)
+        elif self.type == 'alphabeta':
+            result = pool.map(alphabeta_f, args)
+
         print('*' * 50)
         # print(result)
 
@@ -92,13 +109,3 @@ class MapPlayer(Player):
         with self._lock:
             return self._best_move
 
-
-if __name__ == '__main__':
-    from const import RACE_ID, HUM, WOLV, VAMP
-
-    p1 = ThreadMMPlayer(WOLV, depth=3)
-    p1.get_next_move(None)
-    print(p1.get_best_move())
-    import time
-    time.sleep(6)
-    print(p1.get_best_move())

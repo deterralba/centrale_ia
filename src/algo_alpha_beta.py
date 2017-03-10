@@ -45,7 +45,7 @@ def alphabeta(board, race, race_ennemi, depth, transposition_table=None):
     return [best_action]  # return a list with only one move for the moment
 
 
-def _alpha_beta(is_max, board, race, race_ennemi, depth, all_actions, counter, alpha, beta, transposition_table):
+def _alpha_beta(is_max, board, race, race_ennemi, depth, all_actions, counter, alpha, beta, transposition_table=None):
     winning_race = board.is_over()
     if winning_race:
         score = INF if winning_race == race else -INF
