@@ -21,10 +21,12 @@ class Board:
         if initial_pop is not None:
             self.update_grid(initial_pop)
         self.current_player = None
+        self.proba = 1
 
     def copy(self):
         board = Board(self.grid.shape, grid=self.grid.copy())
         board.current_player = self.current_player
+        board.proba = self.proba
         return board
 
     def enumerate_squares(self):
@@ -61,6 +63,8 @@ class Board:
             raise ActionInvalidError('action not valid: {}'.format(action))
 
     def do_actions(self, actions):
+        self.proba = 1
+
         if not self.SKIP_CHECKS:
             for square in self.enumerate_squares():
                 # TODO use np.count_nonzero
@@ -75,23 +79,45 @@ class Board:
             changed_squares.append(action.from_)
             changed_squares.append(action.to)
             self.moves(action)
-        for square in changed_squares:
-            self.resolve_square(square)
 
-    def resolve_square(self, square):
-        #nb_zeros = list(self.grid[square]).count(0)
-        nb_zeros = np.sum(self.grid[square] == 0)
-        #nb_zeros = np.count_nonzero(self.grid[square]) # TODO update code to make this works
-        if nb_zeros >= 2:
-            return
-        elif nb_zeros == 0:
-            print(self.grid)
-            raise ValueError('impossible to resolve 3 races on one square')
-        elif nb_zeros == 1:
-            if self.grid[square][RACE_ID[HUM]] > 0:
-                attack_humans(self.current_player, self.grid[square])
-            else:
-                attack_monsters(self.current_player, self.grid[square])
+        boards = [self]
+        for square in changed_squares:
+            outcomes = get_outcomes(self, square)  # returns a list of results, proba : {'result':[0,2,0], 'proba':p}
+            boards = resolve_square(boards, outcomes, square)  # applies to squares and duplicates boards if needed
+        return boards
+
+
+def apply_outcome(board, outcome, square):
+    board.grid[square] = outcome['result']
+    board.proba *= outcome['proba']
+
+
+def resolve_square(boards, outcomes, square):
+    original_proba = boards[0].proba
+    for board in boards[:]:
+        apply_outcome(board, outcomes[0], square)
+        for outcome in outcomes[1:]:
+            new_board = board.copy()
+            new_board.proba = original_proba
+            apply_outcome(new_board, outcome, square)
+            boards.append(new_board)
+    return boards
+
+
+def get_outcomes(board, square):
+    # nb_zeros = list(board.grid[square]).count(0)
+    # nb_zeros = np.count_nonzero(board.grid[square]) # TODO update code to make this works
+    nb_zeros = np.sum(board.grid[square] == 0)
+    if nb_zeros >= 2:
+        return [{'proba': 1, 'result': board.grid[square]}]
+    elif nb_zeros == 0:
+        print(board.grid)
+        raise ValueError('impossible to resolve 3 races on one square')
+    elif nb_zeros == 1:
+        if board.grid[square][RACE_ID[HUM]] > 0:
+            return attack_humans_with_proba(board.current_player, board.grid[square])
+        else:
+            return attack_monsters_with_proba(board.current_player, board.grid[square])
 
 
 class Action:
@@ -175,3 +201,58 @@ def attack_monsters(attacker, square):
             enemies = 0
     square[RACE_ID[attacker]] = units
     square[RACE_ID[enemy_race]] = enemies
+
+
+def attack_humans_with_proba(attacker, square):
+    units = square[RACE_ID[attacker]]
+    enemy_race = HUM
+    enemies = square[RACE_ID[enemy_race]]
+    if units / enemies >= 1:
+        square_win = square.copy()
+        square_win[RACE_ID[attacker]] += enemies
+        square_win[RACE_ID[enemy_race]] = 0
+        return [{'proba': 1, 'result': square_win}]
+    else:
+        p = units / (2 * enemies)
+
+        square_win = square.copy()
+        square_win[RACE_ID[attacker]] = int(p * (enemies + units))
+        square_win[RACE_ID[enemy_race]] = 0
+
+        square_lose = square.copy()
+        square_lose[RACE_ID[attacker]] = 0
+        square_lose[RACE_ID[enemy_race]] = int(enemies * (1 - p))
+
+        return [
+            {'proba': p, 'result': square_win},
+            {'proba': 1 - p, 'result': square_lose},
+        ]
+
+
+def attack_monsters_with_proba(attacker, square):
+    units = square[RACE_ID[attacker]]
+    enemy_race = WOLV if attacker == VAMP else VAMP
+    enemies = square[RACE_ID[enemy_race]]
+    #print('Enemies : {} {}'.format(enemy_race, enemies))
+    if units / enemies >= 1.5:
+        square_win = square.copy()
+        square_win[RACE_ID[enemy_race]] = 0
+        return [{'proba': 1, 'result': square_win}]
+    else:
+        if units >= enemies:
+            p = units / enemies - 0.5
+        else:
+            p = units / (2 * enemies)
+
+        square_win = square.copy()
+        square_win[RACE_ID[attacker]] = int(p * units)
+        square_win[RACE_ID[enemy_race]] = 0
+
+        square_lose = square.copy()
+        square_lose[RACE_ID[attacker]] = 0
+        square_lose[RACE_ID[enemy_race]] = int(enemies * (1 - p))
+
+        return [
+            {'proba': p, 'result': square_win},
+            {'proba': 1 - p, 'result': square_lose},
+        ]
