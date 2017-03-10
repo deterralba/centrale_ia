@@ -1,7 +1,7 @@
 import numpy as np
 from time import time, sleep
 from const import RACE_ID
-from board import Action, Board
+from board import Action, Board, enumerate_squares
 from threading import RLock
 
 from game import TRANSPOSITION, INF
@@ -38,7 +38,46 @@ def evaluate(board, race, race_ennemi):
         dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
         return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
+def evaluate_fred(board, race, race_ennemi):
+    ally_squares = []
+    enemy_squares = []
+    human_squares = []
+    H = np.sum(board.grid, axis=(0, 1))
+    
+    for square in board.enumerate_squares():
+        if square[RACE_ID[race]]>0:
+            ally_squares += [square]
+        elif square[RACE_ID[race_ennemi]]>0:
+            enemy_squares += [square]
+        elif square[RACE_ID[HUM]]>0:
+            human_squares += [square]
+    
+    for square_ally in ally_squares:
+        for square_hum in human_squares:
+            dist = L_inf_dist(square_ally, square_hum)
+            square_content_fight=0
+            H += (0.1**dist) * expected_outcome(square_content_fight)
+    
+    for square_ally in ally_squares:
+        for square_enemy in enemy_squares:
+            dist = L_inf_dist(square_ally, square_enemy)
+            square_fight=0
+            H += (0.1**dist) * expected_outcome(square_content_fight)
+    
+    for square_enemy in enemy_squares:
+        for square_hum in human_squares:
+            dist = L_inf_dist(square_enemy, square_hum)
+            square_fight=0
+            H += (0.1**dist) * expected_outcome(square_content_fight)
+    
+    return H[RACE_ID[race]]-H[RACE_ID[race_ennemi]]
+    
+def expected_outcome(square_content):
+    pass
 
+def L_inf_dist(square1, square2):
+    return max(square1[0]-square2[0],square1[1]-square2[1],square2[0]-square1[0],square2[1]-square1[1])
+    
 def clone_and_apply_actions(board, actions, race):
     clone_board = board.copy()
     clone_board.current_player = race
