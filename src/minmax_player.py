@@ -5,8 +5,10 @@ from threading import Thread, Lock
 from algo_mini_max import SafeCounter, get_available_moves, _min_max
 from board import Board
 from time import time
+from algo_alpha_beta import alphabeta
 
 from game import INF
+
 
 class SmartPlayer(Player):
     def __init__(self, race, depth=3):
@@ -18,11 +20,16 @@ class SmartPlayer(Player):
         return minimax(board, self.race, self.race_ennemi, self.depth, self.transposition_table)
 
 
+class SmartPlayerAlpha(SmartPlayer):
+    def get_next_move(self, board):
+        return alphabeta(board, self.race, self.race_ennemi, self.depth, self.transposition_table)
+
+
 class ThreadMMPlayer(Player):
     def __init__(self, race, depth=3, nb_thread=4):
         super(ThreadMMPlayer, self).__init__(race)
         self.depth = depth
-        self.nb_thread = nb_thread # TODO update : not used
+        self.nb_thread = nb_thread  # TODO update : not used
         self._best_move = None
         self._best_score = None
         self._lock = Lock()

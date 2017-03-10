@@ -1,6 +1,6 @@
 
 # Parameters
-TRANSPOSITION = True
+TRANSPOSITION = False
 RANDOM_MATCH_OUTPUT = False
 INF = 10e9
 
@@ -30,7 +30,7 @@ def generate_play(player1, player2, board, draw=lambda x: None):
 if __name__ == '__main__':
     from time import sleep, time
     from player import RandomPlayer
-    from minmax_player import SmartPlayer, ThreadMMPlayer
+    from minmax_player import SmartPlayer, ThreadMMPlayer, SmartPlayerAlpha
     from minmax_player_map import MapPlayer
     from const import HUM, WOLV, VAMP
     from board import Board
@@ -44,13 +44,13 @@ if __name__ == '__main__':
     board = Board((4, 5), initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-    player1 = SmartPlayer(VAMP, depth=5)
+    player1 = SmartPlayerAlpha(VAMP, depth=5)
 
     #player2 = MapPlayer(WOLV, depth=5)
-    player2 = SmartPlayer(WOLV, depth=5)
+    player2 = SmartPlayerAlpha(WOLV, depth=5)
     #player2 = RandomPlayer(WOLV)
 
-    GUI = False
+    GUI = True
     if GUI:
         from draw import start_GUI, draw
         start_GUI(board.grid, generate_play(player1, player2, board, draw))
