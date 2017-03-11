@@ -1,5 +1,6 @@
 from player import Player
-from algo_mini_max import minimax
+from minmax_player import SmartPlayer
+from algo_mini_max import minimax, clone_and_apply_actions
 from random import random
 from threading import Thread, Lock
 from algo_mini_max import SafeCounter, get_available_moves, INF, _min_max
@@ -8,22 +9,34 @@ from time import time
 
 
 def f(args):
-    action, board, race, race_ennemi, depth, all_actions = args
-    clone_board = board.copy()
-    clone_board.current_player = race
-    clone_board.do_actions([action])
-    _, score, total_counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, all_actions, 0)
+    action, board, race, race_ennemi, depth, esperance, all_actions = args
+    playing_race = race
+    counter = 0
+    if esperance:
+        clone_boards = clone_and_apply_actions(board, [action], playing_race, True)
+        scores = []
+        for clone_board in clone_boards:
+            _, score, counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
+            scores.append(score*clone_board.proba)
+        if len(scores) > 1:
+            #print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
+            pass
+        score = sum(scores)
+    else:
+        clone_board = clone_and_apply_actions(board, [action], playing_race, False)
+        _, score, counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
+
+    #_, score, total_counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, 0)
     #player.set_best_move(action, score)
     #print('suggesting move ', score)
     #print('total counter', total_counter)
-    return (action, score, total_counter)
+    return (action, score, counter)
 
 
-class MapPlayer(Player):
+class MapPlayer(SmartPlayer):
 
-    def __init__(self, race, depth=3):
-        super(MapPlayer, self).__init__(race)
-        self.depth = depth
+    def __init__(self, race, depth=3, esperance=True):
+        super(MapPlayer, self).__init__(race, depth=depth, esperance=esperance)
         self._best_move = None
         self._best_score = None
         self._lock = Lock()
@@ -48,7 +61,7 @@ class MapPlayer(Player):
 
         args = []
         for action in actions:
-            args.append((action, board, self.race, self.race_ennemi, self.depth, all_actions))
+            args.append((action, board, self.race, self.race_ennemi, self.depth, self.esperance, all_actions))
 
         from multiprocessing import Pool
         #from pathos.multiprocessing import ProcessingPool as Pool

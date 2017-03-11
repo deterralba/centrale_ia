@@ -6,8 +6,7 @@ from threading import RLock
 
 from game import TRANSPOSITION, INF
 
-ESPERANCE = False
-PRINT_SUMMARY = False
+PRINT_SUMMARY = True
 
 class SafeCounter:
 
@@ -47,10 +46,10 @@ def clone_and_apply_actions(board, actions, race, simulation):
     return clone_board.do_actions(actions, simulation)
 
 
-def minimax(board, race, race_ennemi, depth, transposition_table=None):
+def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
-    Board.SKIP_CHECKS = True  # CHANGE ME
+    Board.SKIP_CHECKS = True
 
     if TRANSPOSITION:
         assert transposition_table is not None
@@ -59,7 +58,7 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
 
     counter = 0
     all_actions = []
-    best_action, best_score, total_counter = _min_max(True, board, race, race_ennemi, depth, all_actions, counter)
+    best_action, best_score, total_counter = _min_max(True, board, race, race_ennemi, depth, esperance, all_actions, counter)
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
@@ -69,10 +68,8 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
     if PRINT_SUMMARY:
         print('Action summary')
         all_actions.append((best_action, depth, best_score))
-        all_actions.sort(key=lambda x: x[1], reverse=True)
-
         all_actions = [action for action in all_actions if action[2] == best_score]
-        print('after filter')
+        all_actions.sort(key=lambda x: x[1], reverse=True)
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
@@ -80,7 +77,7 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
     return [best_action]  # return a list with only one move for the moment
 
 
-def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
+def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, counter):
     winning_race = board.is_over()
     if winning_race:
         score = INF if winning_race == race else -INF
@@ -94,11 +91,11 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     best_action = actions[0]
     extrem_score = -INF if is_max else INF
     for action in actions:
-        if ESPERANCE:
+        if esperance:
             clone_boards = clone_and_apply_actions(board, [action], playing_race, True)
             scores = []
             for clone_board in clone_boards:
-                _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+                _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
                 scores.append(score*clone_board.proba)
             if len(scores) > 1:
                 #print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
@@ -106,10 +103,7 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
             score = sum(scores)
         else:
             clone_board = clone_and_apply_actions(board, [action], playing_race, False)
-            #clone_boards = clone_and_apply_actions(board, [action], playing_race)
-            #clone_board = max(clone_boards, key=lambda x: x.proba)
-            _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
-        #print('score = ' + str(score))
+            _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
         if is_max:
             if score > extrem_score:
                 extrem_score = score

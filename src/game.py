@@ -7,6 +7,7 @@ INF = 10e9
 
 def generate_play(player1, player2, board, draw=lambda x: None):
     def play(*args):
+        global WAIT
         initial_start_time = time()
         current_player = player1
         while not board.is_over():
@@ -21,7 +22,8 @@ def generate_play(player1, player2, board, draw=lambda x: None):
             draw(board.grid)
             # sleep(0.2)
             current_player = player2 if current_player == player1 else player1
-            # input('waiting')
+            if WAIT:
+                input('waiting')
         print(board.is_over() + ' won!')
         print('lasted {:.2f}s'.format(time() - initial_start_time))
     return play
@@ -35,6 +37,12 @@ if __name__ == '__main__':
     from const import HUM, WOLV, VAMP
     from board import Board
 
+    import sys
+    global WAIT
+    WAIT = False
+    if 'wait' in sys.argv:
+        WAIT = True
+
     initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 4, WOLV: 0},
                    {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
                    {'x': 3, 'y': 3, HUM: 0, VAMP: 0, WOLV: 1},
@@ -44,10 +52,10 @@ if __name__ == '__main__':
     board = Board((4, 5), initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-    player1 = SmartPlayer(VAMP, depth=5)
+    player1 = SmartPlayer(VAMP, depth=3, esperance=True)
 
-    #player2 = MapPlayer(WOLV, depth=5)
-    player2 = SmartPlayer(WOLV, depth=4)
+    #player2 = MapPlayer(WOLV, depth=5, esperance=True)
+    player2 = SmartPlayer(WOLV, depth=5, esperance=True)
     #player2 = RandomPlayer(WOLV)
 
     GUI = True

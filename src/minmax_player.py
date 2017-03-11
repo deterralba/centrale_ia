@@ -9,12 +9,13 @@ from time import time
 from game import INF
 
 class SmartPlayer(Player):
-    def __init__(self, race, depth=3):
+    def __init__(self, race, depth=3, esperance=False):
         super(SmartPlayer, self).__init__(race)
         self.depth = depth
+        self.esperance = esperance
 
     def get_next_move(self, board):
-        return minimax(board, self.race, self.race_ennemi, self.depth)
+        return minimax(board, self.race, self.race_ennemi, self.depth, self.esperance)
 
 
 class ThreadMMPlayer(Player):
