@@ -52,10 +52,10 @@ if __name__ == '__main__':
     board = Board((4, 5), initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-    player1 = SmartPlayer(VAMP, depth=3, esperance=True)
+    player1 = SmartPlayer(VAMP, depth=6, esperance=True)
 
     #player2 = MapPlayer(WOLV, depth=5, esperance=True)
-    player2 = SmartPlayer(WOLV, depth=5, esperance=True)
+    player2 = SmartPlayer(WOLV, depth=3, esperance=False)
     #player2 = RandomPlayer(WOLV)
 
     GUI = True

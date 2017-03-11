@@ -44,7 +44,6 @@ class MapPlayer(SmartPlayer):
     def get_next_move(self, board):
         print('%' * 50)
         print(self.__class__.__name__)
-        print('%' * 50)
         self._best_move = None
         self._best_score = None
 

@@ -1,5 +1,5 @@
 import numpy as np
-from time import time, sleep
+from time import time
 from const import RACE_ID
 from board import Action, Board
 from threading import RLock
@@ -7,6 +7,7 @@ from threading import RLock
 from game import TRANSPOSITION, INF
 
 PRINT_SUMMARY = True
+
 
 class SafeCounter:
 
@@ -27,14 +28,23 @@ class SafeCounter:
             print('nb iterations reset: ', self._nb_iterations)
 
 
-def evaluate(board, race, race_ennemi):
-    '''heuristic function'''
-    sum_ = np.sum(board.grid, axis=(0, 1))
-    if sum_[RACE_ID[race]] == 0:
-        return -INF
-    elif sum_[RACE_ID[race_ennemi]] == 0:
-        return INF
-    else:
+INF_EVAL = False
+if INF_EVAL:
+    def evaluate(board, race, race_ennemi):
+        '''heuristic function'''
+        sum_ = np.sum(board.grid, axis=(0, 1))
+        if sum_[RACE_ID[race]] == 0:
+            return -INF
+        elif sum_[RACE_ID[race_ennemi]] == 0:
+            return INF
+        else:
+            # evite la dispersion
+            dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
+            return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
+else:
+    def evaluate(board, race, race_ennemi):
+        '''heuristic function'''
+        sum_ = np.sum(board.grid, axis=(0, 1))
         # evite la dispersion
         dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
         return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
@@ -58,7 +68,8 @@ def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None
 
     counter = 0
     all_actions = []
-    best_action, best_score, total_counter = _min_max(True, board, race, race_ennemi, depth, esperance, all_actions, counter)
+    best_action, best_score, total_counter = _min_max(
+        True, board, race, race_ennemi, depth, esperance, all_actions, counter)
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
@@ -80,8 +91,11 @@ def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None
 def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, counter):
     winning_race = board.is_over()
     if winning_race:
-        score = INF if winning_race == race else -INF
-        return None, score, counter + 1
+        if INF_EVAL:
+            score = INF if winning_race == race else -INF
+            return None, score, counter + 1
+        else:
+            return None, 2 * evaluate(board, race, race_ennemi), counter + 1
     if depth == 0:
         return None, evaluate(board, race, race_ennemi), counter + 1
 
@@ -95,15 +109,19 @@ def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, co
             clone_boards = clone_and_apply_actions(board, [action], playing_race, True)
             scores = []
             for clone_board in clone_boards:
-                _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
-                scores.append(score*clone_board.proba)
+                _, score, counter = _min_max(
+                    not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter
+                )
+                scores.append(score * clone_board.proba)
             if len(scores) > 1:
-                #print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
+                # print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
                 pass
             score = sum(scores)
         else:
             clone_board = clone_and_apply_actions(board, [action], playing_race, False)
-            _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
+            _, score, counter = _min_max(
+                not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter
+            )
         if is_max:
             if score > extrem_score:
                 extrem_score = score
