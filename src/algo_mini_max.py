@@ -6,7 +6,8 @@ from threading import RLock
 
 from game import TRANSPOSITION, INF
 
-ESPERANCE = True
+ESPERANCE = False
+PRINT_SUMMARY = False
 
 class SafeCounter:
 
@@ -65,7 +66,7 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
 
     Board.SKIP_CHECKS = old_skip
 
-    if True:
+    if PRINT_SUMMARY:
         print('Action summary')
         all_actions.append((best_action, depth, best_score))
         all_actions.sort(key=lambda x: x[1], reverse=True)
