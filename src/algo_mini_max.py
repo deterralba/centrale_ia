@@ -50,7 +50,7 @@ def clone_and_apply_actions(board, actions, race, simulation):
 def minimax(board, race, race_ennemi, depth, transposition_table=None):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
-    Board.SKIP_CHECKS = False  # CHANGE ME
+    Board.SKIP_CHECKS = True  # CHANGE ME
 
     if TRANSPOSITION:
         assert transposition_table is not None
