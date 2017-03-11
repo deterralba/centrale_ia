@@ -57,12 +57,14 @@ class Board:
     def moves(self, action):
         ''' Moves the units, does not resolve any fight'''
         if self.SKIP_CHECKS or action.is_valid(self):
+            # print(action.number)
             self.grid[action.from_][RACE_ID[action.race]] -= action.number
             self.grid[action.to][RACE_ID[action.race]] += action.number
         else:
+            print(self.grid)
             raise ActionInvalidError('action not valid: {}'.format(action))
 
-    def do_actions(self, actions):
+    def do_actions(self, actions, simulation):
         self.proba = 1
 
         if not self.SKIP_CHECKS:
@@ -80,11 +82,31 @@ class Board:
             changed_squares.append(action.to)
             self.moves(action)
 
-        boards = [self]
-        for square in changed_squares:
-            outcomes = get_outcomes(self, square)  # returns a list of results, proba : {'result':[0,2,0], 'proba':p}
-            boards = resolve_square(boards, outcomes, square)  # applies to squares and duplicates boards if needed
-        return boards
+        if simulation:
+            boards = [self]
+            for square in changed_squares:
+                outcomes = get_outcomes(self, square)  # returns a list of results, proba : {'result':[0,2,0], 'proba':p}
+                boards = resolve_square_with_proba(boards, outcomes, square)  # applies to squares and duplicates boards if needed
+            return boards
+        else:
+            for square in changed_squares:
+                resolve_square(self, square)
+            return self
+
+
+def resolve_square(board, square):
+    # nb_zeros = list(board.grid[square]).count(0)
+    nb_zeros = np.sum(board.grid[square] == 0)
+    if nb_zeros == 1:
+        if board.grid[square][RACE_ID[HUM]] > 0:
+            attack_humans(board.current_player, board.grid[square])
+        else:
+            attack_monsters(board.current_player, board.grid[square])
+    elif nb_zeros >= 2:
+        return
+    elif nb_zeros == 0:
+        print(board.grid)
+        raise ValueError('impossible to resolve 3 races on one square')
 
 
 def apply_outcome(board, outcome, square):
@@ -92,7 +114,7 @@ def apply_outcome(board, outcome, square):
     board.proba *= outcome['proba']
 
 
-def resolve_square(boards, outcomes, square):
+def resolve_square_with_proba(boards, outcomes, square):
     original_proba = boards[0].proba
     for board in boards[:]:
         apply_outcome(board, outcomes[0], square)
@@ -181,7 +203,7 @@ def attack_monsters(attacker, square):
     units = square[RACE_ID[attacker]]
     enemy_race = WOLV if attacker == VAMP else VAMP
     enemies = square[RACE_ID[enemy_race]]
-    #print('Enemies : {} {}'.format(enemy_race, enemies))
+    # print('Enemies : {} {}'.format(enemy_race, enemies))
     if units / enemies >= 1.5:
         enemies = 0
     else:

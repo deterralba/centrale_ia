@@ -6,6 +6,7 @@ from threading import RLock
 
 from game import TRANSPOSITION, INF
 
+ESPERANCE = True
 
 class SafeCounter:
 
@@ -39,17 +40,16 @@ def evaluate(board, race, race_ennemi):
         return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
 
-def clone_and_apply_actions(board, actions, race):
+def clone_and_apply_actions(board, actions, race, simulation):
     clone_board = board.copy()
     clone_board.current_player = race
-    clone_board.do_actions(actions)
-    return clone_board
+    return clone_board.do_actions(actions, simulation)
 
 
 def minimax(board, race, race_ennemi, depth, transposition_table=None):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
-    Board.SKIP_CHECKS = True
+    Board.SKIP_CHECKS = False  # CHANGE ME
 
     if TRANSPOSITION:
         assert transposition_table is not None
@@ -65,13 +65,11 @@ def minimax(board, race, race_ennemi, depth, transposition_table=None):
 
     Board.SKIP_CHECKS = old_skip
 
-    if False:
+    if True:
         print('Action summary')
         all_actions.append((best_action, depth, best_score))
         all_actions.sort(key=lambda x: x[1], reverse=True)
 
-        print('before filter', all_actions)
-        print(best_score)
         all_actions = [action for action in all_actions if action[2] == best_score]
         print('after filter')
         print('\n'.join(map(str, all_actions)))
@@ -95,8 +93,21 @@ def _min_max(is_max, board, race, race_ennemi, depth, all_actions, counter):
     best_action = actions[0]
     extrem_score = -INF if is_max else INF
     for action in actions:
-        clone_board = clone_and_apply_actions(board, [action], playing_race)
-        _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+        if ESPERANCE:
+            clone_boards = clone_and_apply_actions(board, [action], playing_race, True)
+            scores = []
+            for clone_board in clone_boards:
+                _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
+                scores.append(score*clone_board.proba)
+            if len(scores) > 1:
+                #print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
+                pass
+            score = sum(scores)
+        else:
+            clone_board = clone_and_apply_actions(board, [action], playing_race, False)
+            #clone_boards = clone_and_apply_actions(board, [action], playing_race)
+            #clone_board = max(clone_boards, key=lambda x: x.proba)
+            _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter)
         #print('score = ' + str(score))
         if is_max:
             if score > extrem_score:

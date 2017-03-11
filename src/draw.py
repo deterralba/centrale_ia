@@ -17,7 +17,7 @@ def draw_square(canvas, l, c, people):
         color = 'white'  # say no to racism
         text_color = 'black'
     else:
-        print(people)
+        print(people, number)
         raise ValueError()
     canvas.create_rectangle(SQUARE_SIZE*c, SQUARE_SIZE*l, SQUARE_SIZE*(c+1), SQUARE_SIZE*(l+1), fill=color, outline=color)
     canvas.create_text(center[0], center[1], text=str(number), fill=text_color)

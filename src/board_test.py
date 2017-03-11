@@ -138,7 +138,7 @@ def test_resolve_square():
     board1 = Board(shape)
     board1.current_player = VAMP
     board1.proba = 0.5
-    #HUM: 0, VAMP: 1, WOLV: 2
+    # HUM: 0, VAMP: 1, WOLV: 2
     board1.grid = np.array([
         [[1, 0, 0], [0, 2, 0]],
         [[0, 0, 0], [0, 0, 0]],

@@ -17,7 +17,7 @@ def generate_play(player1, player2, board, draw=lambda x: None):
                 print('player {} timeout and looses!'.format(current_player))
                 # break # FIXME
             print('action of {} are {}'.format(board.current_player, actions))
-            board.do_actions(actions)
+            board.do_actions(actions, False)
             draw(board.grid)
             # sleep(0.2)
             current_player = player2 if current_player == player1 else player1
@@ -43,14 +43,14 @@ if __name__ == '__main__':
 
     board = Board((4, 5), initial_pop)
 
-    player1 = MapPlayer(VAMP, depth=5)
-    #player1 = SmartPlayer(VAMP, depth=4)
+    #player1 = MapPlayer(VAMP, depth=5)
+    player1 = SmartPlayer(VAMP, depth=4)
 
-    player2 = MapPlayer(WOLV, depth=5)
-    #player2 = SmartPlayer(WOLV, depth=4)
+    #player2 = MapPlayer(WOLV, depth=5)
+    player2 = SmartPlayer(WOLV, depth=4)
     #player2 = RandomPlayer(WOLV)
 
-    GUI = False
+    GUI = True
     if GUI:
         from draw import start_GUI, draw
         start_GUI(board.grid, generate_play(player1, player2, board, draw))
