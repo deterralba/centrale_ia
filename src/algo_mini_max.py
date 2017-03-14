@@ -55,28 +55,64 @@ def evaluate_fred(board, race, race_ennemi):
     for square_ally in ally_squares:
         for square_hum in human_squares:
             dist = L_inf_dist(square_ally, square_hum)
-            square_content_fight=0
-            H += (0.1**dist) * expected_outcome(square_content_fight)
+            H += (0.1**dist) * expected_outcome_attack_humans(
+                board.grid[square_ally][RACE_ID[race]],
+                board.grid[square_hum][RACE_ID[HUM]])
     
     for square_ally in ally_squares:
         for square_enemy in enemy_squares:
             dist = L_inf_dist(square_ally, square_enemy)
-            square_fight=0
-            H += (0.1**dist) * expected_outcome(square_content_fight)
+            H += (0.1**dist) * expected_outcome_attack_player(
+                board.grid[square_ally][RACE_ID[race]],
+                board.grid[square_enemy][RACE_ID[race_ennemi]])
+            H -= (0.1**dist) * expected_outcome_attack_player(
+                board.grid[square_enemy][RACE_ID[race_ennemi]],
+                board.grid[square_ally][RACE_ID[race]])
     
     for square_enemy in enemy_squares:
         for square_hum in human_squares:
             dist = L_inf_dist(square_enemy, square_hum)
             square_fight=0
-            H += (0.1**dist) * expected_outcome(square_content_fight)
+            H += (0.1**dist) * expected_outcome_attack_humans(
+                board.grid[square_enemy][RACE_ID[race_ennemi]],
+                board.grid[square_hum][RACE_ID[HUM]])
     
-    return H[RACE_ID[race]]-H[RACE_ID[race_ennemi]]
+    return H
+
+def expected_outcome_attack_humans(attackingNumberOfPlayer, defendingNumberOfHumans):
+    '''Returns the average increase or decrease in warriors after combat'''
+    if(attackingNumberOfPlayer>=1.5*defendingNumberOfHumans):
+        return defendingNumberOfHumans
+    elif(attackingNumberOfPlayer>=defendingNumberOfHumans):
+        P = attackingNumberOfPlayer/defendingNumberOfHumans - 0.5
+    else:
+        P = attackingNumberOfPlayer/(2*defendingNumberOfHumans)
+        
+    # We lose units with probability 1-P and gain defending units with prob. P
+    winCase = (P-1)*attackingNumberOfPlayer+P*defendingNumberOfHumans
+    # We lose our units
+    losingCase = -attackingNumberOfPlayer
+
+    return P*winCase+(1-P)*losingCase
+
+def expected_outcome_attack_player(attackingNumberOfPlayer, defendingNumberOfPlayer):
+    if(attackingNumberOfPlayer>=1.5*defendingNumberOfPlayer):
+        P = 1
+    elif(attackingNumberOfPlayer>=defendingNumberOfPlayer):
+        P = attackingNumberOfPlayer/defendingNumberOfPlayer - 0.5
+    else:
+        P = attackingNumberOfPlayer/(2*defendingNumberOfPlayer)
     
-def expected_outcome(square_content):
-    pass
+    # We don't gain the defending units but the enemy loses it : same thing !
+    winCase = (P-1)*attackingNumberOfPlayer+defendingNumberOfPlayer
+    # We lose all our units and the opponents loses them with probability P
+    losingCase = -attackingNumberOfPlayer + P*defendingNumberOfPlayer
+    
+    return P*winCase+(1-P)*losingCase
 
 def L_inf_dist(square1, square2):
-    return max(square1[0]-square2[0],square1[1]-square2[1],square2[0]-square1[0],square2[1]-square1[1])
+    return max(square1[0]-square2[0],square1[1]-square2[1],
+               square2[0]-square1[0],square2[1]-square1[1])
     
 def clone_and_apply_actions(board, actions, race):
     clone_board = board.copy()
