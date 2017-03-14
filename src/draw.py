@@ -1,7 +1,7 @@
 import numpy as np
 from const import HUM, WOLV, VAMP
 
-SQUARE_SIZE = 40
+SQUARE_SIZE = 60
 
 def draw_square(canvas, l, c, people):
     global SQUARE_SIZE
@@ -45,8 +45,10 @@ def draw(board):
 
     canvas.update()
 
+
 def get_people(case):
-    return (HUM*bool(case[0]) + VAMP*bool(case[1]) + WOLV*bool(case[2]), max(case))
+    return HUM*bool(case[0]) + VAMP*bool(case[1]) + WOLV*bool(case[2]), max(case)
+
 
 def start_GUI(board, start):
     global SQUARE_SIZE, button, canvas
@@ -55,6 +57,7 @@ def start_GUI(board, start):
 
     import tkinter
     root = tkinter.Tk()
+    root.title('Vampires vs Wolves')
     root.geometry('{}x{}'.format(SQUARE_SIZE*col, SQUARE_SIZE*line + 50))
 
     canvas = tkinter.Canvas(root, width=SQUARE_SIZE*col, height=SQUARE_SIZE*line)
