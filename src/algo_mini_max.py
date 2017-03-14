@@ -1,7 +1,7 @@
 import numpy as np
 from time import time, sleep
-from const import RACE_ID
-from board import Action, Board, enumerate_squares
+from const import RACE_ID, HUM, WOLV, VAMP
+from board import Action, Board#, enumerate_squares
 from threading import RLock
 
 from game import TRANSPOSITION, INF
@@ -27,6 +27,8 @@ class SafeCounter:
 
 
 def evaluate(board, race, race_ennemi):
+    if RACE_ID[race]==1:
+        return evaluate_fred(board, race, race_ennemi)
     '''heuristic function'''
     sum_ = np.sum(board.grid, axis=(0, 1))
     if sum_[RACE_ID[race]] == 0:
@@ -42,14 +44,15 @@ def evaluate_fred(board, race, race_ennemi):
     ally_squares = []
     enemy_squares = []
     human_squares = []
-    H = np.sum(board.grid, axis=(0, 1))
+    sum_ = np.sum(board.grid, axis=(0, 1))
+    H = int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])
     
     for square in board.enumerate_squares():
-        if square[RACE_ID[race]]>0:
+        if board.grid[square][RACE_ID[race]]>0:
             ally_squares += [square]
-        elif square[RACE_ID[race_ennemi]]>0:
+        elif board.grid[square][RACE_ID[race_ennemi]]>0:
             enemy_squares += [square]
-        elif square[RACE_ID[HUM]]>0:
+        elif board.grid[square][RACE_ID[HUM]]>0:
             human_squares += [square]
     
     for square_ally in ally_squares:

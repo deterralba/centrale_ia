@@ -1,4 +1,5 @@
 
+
 # Parameters
 TRANSPOSITION = False
 RANDOM_MATCH_OUTPUT = False
@@ -34,12 +35,14 @@ if __name__ == '__main__':
     from minmax_player_map import MapPlayer
     from const import HUM, WOLV, VAMP
     from board import Board
+    
+    from algo_mini_max import evaluate_fred
 
-    initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 4, WOLV: 0},
+    initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 6, WOLV: 0},
                    {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
                    {'x': 3, 'y': 3, HUM: 0, VAMP: 0, WOLV: 1},
                    {'x': 3, 'y': 1, HUM: 3, VAMP: 0, WOLV: 0},
-                   {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
+                   {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 4}]
 
     board = Board((4, 5), initial_pop)
 
@@ -50,7 +53,7 @@ if __name__ == '__main__':
     #player2 = SmartPlayer(WOLV, depth=4)
     #player2 = RandomPlayer(WOLV)
 
-    GUI = False
+    GUI = True
     if GUI:
         from draw import start_GUI, draw
         start_GUI(board.grid, generate_play(player1, player2, board, draw))
