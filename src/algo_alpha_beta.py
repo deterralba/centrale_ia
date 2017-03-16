@@ -61,7 +61,27 @@ def _alpha_beta(is_max, board, race, race_ennemi, depth, evaluate, esperance, al
     actions = get_available_moves(board, playing_race)  # return a list of possible actions
     best_action = actions[0]
     for action in actions:
-        clone_board = clone_and_apply_actions(board, [action], playing_race)
+        if esperance:
+            clone_boards = clone_and_apply_actions(board, [action], playing_race, True)
+            scores = []
+            for clone_board in clone_boards:
+                _, score, counter = _alpha_beta(
+                    not is_max, clone_board, race, race_ennemi, depth - 1, evaluate, esperance, all_actions, counter, alpha, beta
+                )
+                scores.append(score * clone_board.proba)
+            if len(scores) > 1:
+                # print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
+                pass
+            score = sum(scores)
+        else:
+            clone_board = clone_and_apply_actions(board, [action], playing_race, False)
+            _, score, counter = _alpha_beta(
+                not is_max, clone_board, race, race_ennemi, depth - 1, evaluate, esperance, all_actions, counter, alpha, beta
+            )
+
+        '''
+        # TRANSPOSITION old code
+        clone_board = clone_and_apply_actions(board, [action], playing_race, False)
         skip_alpha_beta = False
         if TRANSPOSITION:
             clone_grid = from_numpy_to_tuple(clone_board)
@@ -76,6 +96,7 @@ def _alpha_beta(is_max, board, race, race_ennemi, depth, evaluate, esperance, al
                 if depth == transposition_table['depth']:
                     transposition_table[clone_grid] = score
 
+        '''
         # print('score = ' + str(score))
         if is_max:
             if score > alpha:

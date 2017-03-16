@@ -49,11 +49,11 @@ if __name__ == '__main__':
     board = Board(size, initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-    #player1 = SmartPlayer(VAMP, depth=2, esperance=False, evaluate=evaluate_inf)
-    player1 = SmartPlayerAlpha(VAMP, depth=2, esperance=False, evaluate=evaluate_inf)
+    #player1 = SmartPlayer(VAMP, depth=2, esperance=True, evaluate=evaluate_inf)
+    player1 = SmartPlayerAlpha(VAMP, depth=2, esperance=True, evaluate=evaluate_inf)
 
     #player2 = MapPlayer(WOLV, depth=5, esperance=True)
-    player2 = SmartPlayer(WOLV, depth=2, esperance=False, evaluate=evaluate_disp)
+    player2 = SmartPlayer(WOLV, depth=2, esperance=True, evaluate=evaluate_disp)
 
     #player2 = RandomPlayer(WOLV)
 
