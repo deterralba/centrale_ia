@@ -1,6 +1,6 @@
 import numpy as np
-from time import time
-from const import RACE_ID
+from time import time, sleep
+from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 from threading import RLock
 
@@ -69,7 +69,8 @@ def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None
     counter = 0
     all_actions = []
     best_action, best_score, total_counter = _min_max(
-        True, board, race, race_ennemi, depth, esperance, all_actions, counter)
+        True, board, race, race_ennemi, depth, esperance, all_actions, counter, transposition_table
+    )
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
@@ -88,7 +89,7 @@ def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None
     return [best_action]  # return a list with only one move for the moment
 
 
-def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, counter):
+def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, counter, transposition_table=None):
     winning_race = board.is_over()
     if winning_race:
         if INF_EVAL:
@@ -122,6 +123,24 @@ def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, co
             _, score, counter = _min_max(
                 not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter
             )
+
+            '''
+            # TODO update code for the transposition_table
+            clone_board = clone_and_apply_actions(board, [action], playing_race, False)
+            skip_min_max = False
+            if TRANSPOSITION:
+                clone_grid = from_numpy_to_tuple(clone_board)
+                if clone_grid in transposition_table.keys():
+                    #print('situation already encountered...skipping calculation thks to transposition_table...')
+                    score = transposition_table[clone_grid]
+                    skip_min_max = True
+            if not skip_min_max:
+                _, score, counter = _min_max(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter, transposition_table)
+                if TRANSPOSITION:
+                    if depth == transposition_table['depth']:
+                        transposition_table[clone_grid] = score
+            '''
+
         if is_max:
             if score > extrem_score:
                 extrem_score = score
@@ -151,3 +170,28 @@ def get_available_moves(board, race):
             ]
             actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
+
+SERIALIZE_TUPLE = False
+if SERIALIZE_TUPLE:
+    def from_numpy_to_tuple(board):
+        '''return a list of tuple with five elements : the square (2) and the number of humans, vampires
+        and wolves respectively'''
+        res = []
+        for square in board.enumerate_squares():
+            res.append((square[0], square[1], board.grid[square][RACE_ID[HUM]], board.grid[square][RACE_ID[VAMP]],
+                        board.grid[square][RACE_ID[WOLV]]))
+        return tuple(res)
+else:
+    def from_numpy_to_tuple(board):
+        '''return a list of tuple with five elements : the square (2) and the number of humans, vampires
+        and wolves respectively'''
+        res = []
+        indexes = np.where(board.grid > 0)
+        array_x, array_y, array_race = indexes
+        for i, x in enumerate(array_x):
+            y = array_y[i]
+            race = array_race[i]
+            nb = board.grid[x, y, race]
+            t = (x, y, race, nb)
+            res.append(t)
+        return tuple(res)

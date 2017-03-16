@@ -13,9 +13,10 @@ class SmartPlayer(Player):
         super(SmartPlayer, self).__init__(race)
         self.depth = depth
         self.esperance = esperance
+        self.transposition_table = {'depth': depth}
 
     def get_next_move(self, board):
-        return minimax(board, self.race, self.race_ennemi, self.depth, self.esperance)
+        return minimax(board, self.race, self.race_ennemi, self.depth, self.esperance, self.transposition_table)
 
 
 class ThreadMMPlayer(Player):
