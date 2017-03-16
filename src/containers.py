@@ -14,9 +14,9 @@ class ContainerList:
                 self._actions = actions
                 self._depth = depth
                 self._score = score
-            print('containerList: SMART SET setting actions with score and depth', self._actions, self._score, self._depth)
+            print('\ncontainerList: SMART SET setting actions with score and depth', self._actions, self._score, self._depth)
         else:
-            print('containerList: SMART SET action was not good enough')
+            print('\ncontainerList: SMART SET action was not good enough', actions, score, depth)
 
     def set(self, actions):
         with self._lock:

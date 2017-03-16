@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #player1 = MapPlayer(race, depth=3)
     #player1 = SmartPlayerAlpha(VAMP, depth=7, esperance=True, evaluate=evaluate_inf)
     #player1 = RandomPlayer(race)
-    player1 = SmartPlayer(VAMP, depth=3, esperance=False, evaluate=evaluate_inf)
+    player1 = SmartPlayer(VAMP, depth=4, esperance=False, evaluate=evaluate_fred)
 
     while True:
         msg = com.listen()
