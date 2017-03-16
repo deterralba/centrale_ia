@@ -1,16 +1,21 @@
 from random import randint
-from const import RACE_ID, HUM, WOLV, VAMP
+from const import RACE_ID, WOLV, VAMP
 from board import Action
 
-class Player:
+
+class Player(object):
     def __init__(self, race):
         self.race = race
+        self.race_ennemi = WOLV if self.race == VAMP else VAMP
 
     def get_next_move(self, board):
         raise NotImplementedError()
 
+    def evaluate(*args, **kwargs):
+        raise NotImplementedError()
 
-class RamdomPlayer(Player):
+
+class RandomPlayer(Player):
     def get_next_move(self, board):
         actions = []
         for square in board.enumerate_squares():

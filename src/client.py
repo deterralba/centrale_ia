@@ -1,4 +1,6 @@
 import socket
+from const import HUM, WOLV, VAMP
+from time import sleep
 
 
 class ComServer:
@@ -22,9 +24,7 @@ class ComServer:
 
     def listen(self):
         msg = self.connexion.recv(3).decode('ascii')
-        if msg == 'UPD':
-            print(self.get_upd())
-        elif msg == 'BYE':
+        if msg == 'BYE':
             self.close_connexion()
         return msg
 
@@ -72,7 +72,7 @@ class ComServer:
                 hum = int.from_bytes(self.connexion.recv(1), 'big')
                 vamp = int.from_bytes(self.connexion.recv(1), 'big')
                 wolv = int.from_bytes(self.connexion.recv(1), 'big')
-                map.append({'x': x, 'y': y, 'hum': hum, 'vamp': vamp, 'wolv': wolv})
+                map.append({'x': x, 'y': y, HUM: hum, VAMP: vamp, WOLV: wolv})
             return map
         else:
             return  'Expected MAP but received : ' + msg
@@ -87,7 +87,7 @@ class ComServer:
             hum = int.from_bytes(self.connexion.recv(1), 'big')
             vamp = int.from_bytes(self.connexion.recv(1), 'big')
             wolv = int.from_bytes(self.connexion.recv(1), 'big')
-            map.append({'x': x, 'y': y, 'hum': hum, 'vamp': vamp, 'wolv': wolv})
+            map.append({'x': x, 'y': y, HUM: hum, VAMP: vamp, WOLV: wolv})
         return map
 
     def send_mov(self, trame):
@@ -117,5 +117,8 @@ if __name__ == '__main__':
             print('BYE')
             break
         else:
+            upd = com.get_upd()
+            print(upd)
             mvt = [[4, 3, 1, 4, 2]]
             com.send_mov(mvt)
+            sleep(2)
