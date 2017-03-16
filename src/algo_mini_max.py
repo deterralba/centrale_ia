@@ -41,12 +41,17 @@ def evaluate(board, race, race_ennemi):
         return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
 def evaluate_fred(board, race, race_ennemi):
-    ally_squares = []
-    enemy_squares = []
-    human_squares = []
+    if race == VAMP:
+        ally_squares = board.vampires
+        enemy_squares = board.wolves
+    else:
+        ally_squares = board.wolves
+        enemy_squares = board.vampires
+    human_squares = board.humans
     sum_ = np.sum(board.grid, axis=(0, 1))
     H = int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])
     
+    '''
     for square in board.enumerate_squares():
         if board.grid[square][RACE_ID[race]]>0:
             ally_squares += [square]
@@ -54,6 +59,7 @@ def evaluate_fred(board, race, race_ennemi):
             enemy_squares += [square]
         elif board.grid[square][RACE_ID[HUM]]>0:
             human_squares += [square]
+    '''
     
     for square_ally in ally_squares:
         for square_hum in human_squares:

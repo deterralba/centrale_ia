@@ -12,8 +12,11 @@ class ActionInvalidError(Exception):
 class Board:
     SKIP_CHECKS = False
 
-    def __init__(self, dimensions, initial_pop=None, grid=None):
+    def __init__(self, dimensions, initial_pop=None, grid=None, humans=[], wolves=[], vampires=[]):
         shape = (dimensions[0], dimensions[1], 3)
+        self.humans = humans
+        self.wolves = wolves
+        self.vampires = vampires
         if grid is not None:
             self.grid = grid
         else:
@@ -47,10 +50,29 @@ class Board:
         for square in changed_squares:
             x = square['x']
             y = square['y']
+            hum = square[HUM]
+            vamp = square[VAMP]
+            wolv = square[WOLV]
             # x, y server representation is not equal to our line column matrix model
-            self.grid[y, x, RACE_ID[HUM]] = square[HUM]
-            self.grid[y, x, RACE_ID[VAMP]] = square[VAMP]
-            self.grid[y, x, RACE_ID[WOLV]] = square[WOLV]
+            self.grid[y, x, RACE_ID[HUM]] = hum
+            self.grid[y, x, RACE_ID[VAMP]] = vamp
+            self.grid[y, x, RACE_ID[WOLV]] = wolv
+            
+            if hum == 0 and (y, x) in self.humans:
+                self.humans.remove((y, x))
+            elif hum > 0  and (y, x) not in self.humans:
+                self.humans.append((y, x))
+                
+            if wolv == 0 and (y, x) in self.wolves:
+                self.wolves.remove((y, x))
+            elif wolv > 0  and (y, x) not in self.wolves:
+                self.wolves.append((y, x))
+                
+            if vamp == 0 and (y, x) in self.vampires:
+                self.vampires.remove((y, x))
+            elif vamp > 0  and (y, x) not in self.vampires:
+                self.vampires.append((y, x))
+            
 
     def moves(self, action):
         ''' Moves the units, does not resolve any fight'''
