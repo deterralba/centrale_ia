@@ -1,5 +1,27 @@
 from const import RACE_ID, HUM
+from game import INF
 import numpy as np
+
+
+def evaluate_inf(board, race, race_ennemi):
+    '''heuristic function'''
+    sum_ = np.sum(board.grid, axis=(0, 1))
+    if sum_[RACE_ID[race]] == 0:
+        return -INF
+    elif sum_[RACE_ID[race_ennemi]] == 0:
+        return INF
+    else:
+        # evite la dispersion
+        dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
+        return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
+
+
+def evaluate_disp(board, race, race_ennemi):
+    '''heuristic function'''
+    sum_ = np.sum(board.grid, axis=(0, 1))
+    # evite la dispersion
+    dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
+    return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
 
 
 def evaluate_fred(board, race, race_ennemi):

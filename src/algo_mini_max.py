@@ -1,5 +1,5 @@
 import numpy as np
-from time import time, sleep
+from time import time
 from const import RACE_ID, HUM, WOLV, VAMP
 from board import Action, Board
 from threading import RLock
@@ -7,6 +7,7 @@ from threading import RLock
 from game import TRANSPOSITION, INF
 
 PRINT_SUMMARY = True
+VICTORY_IS_INF = True
 
 
 class SafeCounter:
@@ -28,35 +29,13 @@ class SafeCounter:
             print('nb iterations reset: ', self._nb_iterations)
 
 
-INF_EVAL = True
-if INF_EVAL:
-    def evaluate(board, race, race_ennemi):
-        '''heuristic function'''
-        sum_ = np.sum(board.grid, axis=(0, 1))
-        if sum_[RACE_ID[race]] == 0:
-            return -INF
-        elif sum_[RACE_ID[race_ennemi]] == 0:
-            return INF
-        else:
-            # evite la dispersion
-            dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
-            return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
-else:
-    def evaluate(board, race, race_ennemi):
-        '''heuristic function'''
-        sum_ = np.sum(board.grid, axis=(0, 1))
-        # evite la dispersion
-        dispersion = int(np.sum(board.grid[:, :, RACE_ID[race]] > 0))
-        return 50 * (int(sum_[RACE_ID[race]]) - int(sum_[RACE_ID[race_ennemi]])) - dispersion
-
-
 def clone_and_apply_actions(board, actions, race, simulation):
     clone_board = board.copy()
     clone_board.current_player = race
     return clone_board.do_actions(actions, simulation)
 
 
-def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None):
+def minimax(board, race, race_ennemi, depth, evaluate, esperance, transposition_table=None):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
@@ -69,7 +48,7 @@ def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None
     counter = 0
     all_actions = []
     best_action, best_score, total_counter = _min_max(
-        True, board, race, race_ennemi, depth, esperance, all_actions, counter, transposition_table
+        True, board, race, race_ennemi, depth, evaluate, esperance, all_actions, counter, transposition_table
     )
 
     print('=' * 40)
@@ -89,10 +68,10 @@ def minimax(board, race, race_ennemi, depth, esperance, transposition_table=None
     return [best_action]  # return a list with only one move for the moment
 
 
-def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, counter, transposition_table=None):
+def _min_max(is_max, board, race, race_ennemi, depth, evaluate, esperance, all_actions, counter, transposition_table=None):
     winning_race = board.is_over()
     if winning_race:
-        if INF_EVAL:
+        if VICTORY_IS_INF:
             score = INF if winning_race == race else -INF
             return None, score, counter + 1
         else:
@@ -111,7 +90,7 @@ def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, co
             scores = []
             for clone_board in clone_boards:
                 _, score, counter = _min_max(
-                    not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter
+                    not is_max, clone_board, race, race_ennemi, depth - 1, evaluate, esperance, all_actions, counter
                 )
                 scores.append(score * clone_board.proba)
             if len(scores) > 1:
@@ -121,7 +100,7 @@ def _min_max(is_max, board, race, race_ennemi, depth, esperance, all_actions, co
         else:
             clone_board = clone_and_apply_actions(board, [action], playing_race, False)
             _, score, counter = _min_max(
-                not is_max, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter
+                not is_max, clone_board, race, race_ennemi, depth - 1, evaluate, esperance, all_actions, counter
             )
 
             '''
@@ -171,6 +150,8 @@ def get_available_moves(board, race):
             actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
 
+
+# For the transposition
 SERIALIZE_TUPLE = False
 if SERIALIZE_TUPLE:
     def from_numpy_to_tuple(board):
