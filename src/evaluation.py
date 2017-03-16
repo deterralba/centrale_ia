@@ -82,7 +82,7 @@ def expected_outcome_attack_humans(attacker, defender):
     # We lose our units
     losingCase = -attackingNumberOfPlayer
 
-    return P * winCase + (1 - P) * losingCase
+    return max(0,P * winCase + (1 - P) * losingCase)
 
 
 def expected_outcome_attack_player(attacker, defender):
@@ -100,7 +100,7 @@ def expected_outcome_attack_player(attacker, defender):
     # We lose all our units and the opponents loses them with probability P
     losingCase = -attackingNumberOfPlayer + P * defendingNumberOfPlayer
 
-    return max(0,P * winCase + (1 - P) * losingCase)
+    return P * winCase + (1 - P) * losingCase
 
 
 def L_inf_dist(square1, square2):
