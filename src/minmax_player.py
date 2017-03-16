@@ -2,6 +2,7 @@ from player import Player
 from algo_mini_max import minimax
 from threading import Thread, Lock
 from algo_mini_max import SafeCounter, get_available_moves, _min_max
+from algo_alpha_beta import alphabeta
 from board import Board
 from time import time
 from game import INF
@@ -20,6 +21,11 @@ class SmartPlayer(Player):
 
     def get_next_move(self, board):
         return minimax(board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, self.transposition_table)
+
+
+class SmartPlayerAlpha(SmartPlayer):
+    def get_next_move(self, board):
+        return alphabeta(board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, self.transposition_table)
 
 
 class ThreadMMPlayer(Player):
