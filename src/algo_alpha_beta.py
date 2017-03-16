@@ -59,6 +59,7 @@ def _alpha_beta(is_max, board, race, race_ennemi, depth, evaluate, esperance, al
     playing_race = race if is_max else race_ennemi
 
     actions = get_available_moves(board, playing_race)  # return a list of possible actions
+    np.random.shuffle(actions)
     best_action = actions[0]
     for action in actions:
         if esperance:
