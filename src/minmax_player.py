@@ -22,6 +22,25 @@ class SmartPlayer(Player):
     def get_next_move(self, board):
         return minimax(board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, self.transposition_table)
 
+    def start_search(self, board, actions_container):
+        self.continue_search = True
+        actions = self.get_next_move(board)
+        actions_container.set(actions)
+
+        thread = Thread(
+            target=self.run,
+            args=(actions_container, board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance)
+        )
+        thread.start()
+
+    def stop_search(self):
+        self.continue_search = False
+
+    @staticmethod
+    def run(actions_container, board, race, race_ennemi, depth, evaluate, esperance):
+        actions = minimax(board, race, race_ennemi, depth, evaluate, esperance)
+        actions_container.set(actions)
+
 
 class SmartPlayerAlpha(SmartPlayer):
     def get_next_move(self, board):
