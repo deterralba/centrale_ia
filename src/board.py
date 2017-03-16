@@ -175,6 +175,9 @@ class Action:
             not actions or self.to not in [ac.from_ for ac in actions]
         ])
 
+    def format(self):
+        return [self.from_[1], self.from_[0], self.number, self.to[1], self.to[0]]
+
 
 def attack_humans(attacker, square):
     units = square[RACE_ID[attacker]]
