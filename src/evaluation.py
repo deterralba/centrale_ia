@@ -66,8 +66,10 @@ def evaluate_fred(board, race, race_ennemi):
     return H
 
 
-def expected_outcome_attack_humans(attackingNumberOfPlayer, defendingNumberOfHumans):
+def expected_outcome_attack_humans(attacker, defender):
     '''Returns the average increase or decrease in warriors after combat'''
+    attackingNumberOfPlayer = int(attacker)
+    defendingNumberOfHumans = int(defender)
     if(attackingNumberOfPlayer >= 1.5 * defendingNumberOfHumans):
         return defendingNumberOfHumans
     elif(attackingNumberOfPlayer >= defendingNumberOfHumans):
@@ -83,7 +85,9 @@ def expected_outcome_attack_humans(attackingNumberOfPlayer, defendingNumberOfHum
     return P * winCase + (1 - P) * losingCase
 
 
-def expected_outcome_attack_player(attackingNumberOfPlayer, defendingNumberOfPlayer):
+def expected_outcome_attack_player(attacker, defender):
+    attackingNumberOfPlayer = int(attacker)
+    defendingNumberOfPlayer = int(defender)
     if(attackingNumberOfPlayer >= 1.5 * defendingNumberOfPlayer):
         P = 1
     elif(attackingNumberOfPlayer >= defendingNumberOfPlayer):
@@ -96,7 +100,7 @@ def expected_outcome_attack_player(attackingNumberOfPlayer, defendingNumberOfPla
     # We lose all our units and the opponents loses them with probability P
     losingCase = -attackingNumberOfPlayer + P * defendingNumberOfPlayer
 
-    return P * winCase + (1 - P) * losingCase
+    return max(0,P * winCase + (1 - P) * losingCase)
 
 
 def L_inf_dist(square1, square2):
