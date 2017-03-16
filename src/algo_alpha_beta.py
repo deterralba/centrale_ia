@@ -35,7 +35,6 @@ def alphabeta(board, race, race_ennemi, depth, evaluate, esperance, transpositio
 
     if PRINT_SUMMARY:
         print('Action summary')
-        all_actions.append((best_action, depth, best_score))
         all_actions = [action for action in all_actions if action[2] == best_score]
         all_actions.sort(key=lambda x: x[1], reverse=True)
         print('\n'.join(map(str, all_actions)))

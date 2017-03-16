@@ -6,6 +6,8 @@ from algo_alpha_beta import alphabeta
 from board import Board
 from time import time
 from game import INF
+from threading import Thread
+from containers import ContainerBool
 
 
 class SmartPlayer(Player):
@@ -22,10 +24,33 @@ class SmartPlayer(Player):
     def get_next_move(self, board):
         return minimax(board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, self.transposition_table)
 
+    def start_search(self, board, actions_container):
+        self.threads_containers = []
+        for depth in range(1, self.depth + 1):
+            should_continue_container = ContainerBool(True)
+            thread = Thread(
+                target=self.run,
+                args=(actions_container, should_continue_container, board, self.race, self.race_ennemi, depth, self.evaluate, self.esperance)
+            )
+            thread.start()
+            self.threads_containers.append(should_continue_container)
+
+    @staticmethod
+    def run(actions_container, should_continue_container, board, race, race_ennemi, depth, evaluate, esperance):
+        actions = minimax(board, race, race_ennemi, depth, evaluate, esperance)
+        if should_continue_container.get():
+            print('\nsetting action {} for depth {}'.format(actions, depth))
+            actions_container.set(actions)
+
 
 class SmartPlayerAlpha(SmartPlayer):
     def get_next_move(self, board):
         return alphabeta(board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, self.transposition_table)
+
+    @staticmethod
+    def run(actions_container, should_continue_container, board, race, race_ennemi, depth, evaluate, esperance):
+        actions = alphabeta(board, race, race_ennemi, depth, evaluate, esperance)
+        actions_container.set(actions)
 
 
 class ThreadMMPlayer(Player):
