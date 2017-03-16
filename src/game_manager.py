@@ -4,30 +4,19 @@ from minmax_player_map import MapPlayer
 from player import RandomPlayer
 from const import HUM, WOLV, VAMP
 from time import sleep, time
+from containers import ContainerList
+from minmax_player import SmartPlayer, SmartPlayerAlpha
+from const import HUM, WOLV, VAMP, simple_pop_size, simple_pop, real_pop, real_pop_size
+from evaluation import evaluate_inf, evaluate_disp, evaluate_fred
 
-from threading import RLock
 
 name = 'JACK'
 time_to_play = 2
-stop = 0.9  # proportion du time_to_play auquel on arrête
+stop = 0.95  # proportion du time_to_play auquel on arrête
 
 # Parameters
 host = 'localhost'
 port = 5555
-
-
-class Container():
-    def __init__(self):
-        self._lock = RLock()
-        self._actions = []
-
-    def set(self, actions):
-        with self._lock:
-            self._actions = actions
-
-    def get(self):
-        with self._lock:
-            return self._actions.copy()
 
 
 if __name__ == '__main__':
@@ -52,8 +41,9 @@ if __name__ == '__main__':
         race = WOLV
 
     #player1 = MapPlayer(race, depth=3)
-    #player1 = SmartPlayer(VAMP, depth=2, esperance=True, evaluate=evaluate_inf)
-    player1 = RandomPlayer(race)
+    player1 = SmartPlayer(VAMP, depth=4, esperance=True, evaluate=evaluate_inf)
+    #player1 = SmartPlayerAlpha(VAMP, depth=7, esperance=True, evaluate=evaluate_inf)
+    #player1 = RandomPlayer(race)
 
     while True:
         msg = com.listen()
@@ -63,7 +53,7 @@ if __name__ == '__main__':
             upd = com.get_upd()
             board.update_grid(upd)
 
-            actions_container = Container()
+            actions_container = ContainerList()
             player1.start_search(board, actions_container)
 
             sleep(1.5)

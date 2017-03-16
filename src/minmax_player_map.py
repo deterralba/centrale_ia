@@ -1,4 +1,3 @@
-from player import Player
 from minmax_player import SmartPlayer
 from algo_mini_max import minimax, clone_and_apply_actions
 from random import random
