@@ -28,7 +28,7 @@ class SafeCounter:
             print('nb iterations reset: ', self._nb_iterations)
 
 
-INF_EVAL = False
+INF_EVAL = True
 if INF_EVAL:
     def evaluate(board, race, race_ennemi):
         '''heuristic function'''

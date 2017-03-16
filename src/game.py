@@ -34,7 +34,7 @@ if __name__ == '__main__':
     from player import RandomPlayer
     from minmax_player import SmartPlayer, ThreadMMPlayer
     from minmax_player_map import MapPlayer
-    from const import HUM, WOLV, VAMP
+    from const import HUM, WOLV, VAMP, simple_pop_size, simple_pop, real_pop, real_pop_size
     from board import Board
 
     import sys
@@ -43,19 +43,15 @@ if __name__ == '__main__':
     if 'wait' in sys.argv:
         WAIT = True
 
-    initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 4, WOLV: 0},
-                   {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
-                   {'x': 3, 'y': 3, HUM: 0, VAMP: 0, WOLV: 1},
-                   {'x': 3, 'y': 1, HUM: 3, VAMP: 0, WOLV: 0},
-                   {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
-
-    board = Board((4, 5), initial_pop)
+    size = real_pop_size
+    initial_pop = real_pop
+    board = Board(size, initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-    player1 = SmartPlayer(VAMP, depth=6, esperance=True)
+    player1 = SmartPlayer(VAMP, depth=4, esperance=False)
 
     #player2 = MapPlayer(WOLV, depth=5, esperance=True)
-    player2 = SmartPlayer(WOLV, depth=3, esperance=False)
+    player2 = SmartPlayer(WOLV, depth=4, esperance=False)
     #player2 = RandomPlayer(WOLV)
 
     GUI = True
@@ -65,5 +61,6 @@ if __name__ == '__main__':
     else:
         play = generate_play(player1, player2, board)
         play()
+
         #import cProfile
         # cProfile.run('play()')
