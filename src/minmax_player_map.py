@@ -8,7 +8,18 @@ from board import Board
 from time import time
 
 
-def f(args):
+def alphabeta_f(args):
+    action, board, race, race_ennemi, depth, all_actions = args
+    clone_board = board.copy()
+    clone_board.current_player = race
+    clone_board.do_actions([action])
+    alpha = -INF
+    beta = INF
+    _, score, total_counter = _alpha_beta(False, clone_board, race, race_ennemi, depth - 1, all_actions, 0, alpha, beta)
+    return (action, score, total_counter)
+
+
+def minmax_f(args):
     action, board, race, race_ennemi, depth, evaluate, esperance, all_actions = args
     playing_race = race
     counter = 0
@@ -35,8 +46,10 @@ def f(args):
 
 class MapPlayer(SmartPlayer):
 
-    def __init__(self, race, depth=3, esperance=True):
-        super(MapPlayer, self).__init__(race, depth=depth, esperance=esperance)
+    def __init__(self, race, depth=3, esperance=True, type='minmax', evaluate=None):
+        assert type in ['minmax', 'alphabeta']
+        super(MapPlayer, self).__init__(race, depth=depth, esperance=esperance, evaluate=evaluate)
+        self.type = type
         self._best_move = None
         self._best_score = None
         self._lock = Lock()
@@ -68,7 +81,10 @@ class MapPlayer(SmartPlayer):
         pool = Pool()
         # pool.ncpus = 8  # avoid error Pool not running, for a mystirious reason
 
-        result = pool.map(f, args)
+        if self.type == 'minmax':
+            result = pool.map(minmax_f, args)
+        elif self.type == 'alphabeta':
+            result = pool.map(alphabeta_f, args)
         #result = list(result)
         print('*' * 50)
         # print(result)
