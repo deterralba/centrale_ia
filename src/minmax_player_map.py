@@ -9,14 +9,14 @@ from time import time
 
 
 def f(args):
-    action, board, race, race_ennemi, depth, esperance, all_actions = args
+    action, board, race, race_ennemi, depth, evaluate, esperance, all_actions = args
     playing_race = race
     counter = 0
     if esperance:
         clone_boards = clone_and_apply_actions(board, [action], playing_race, True)
         scores = []
         for clone_board in clone_boards:
-            _, score, counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
+            _, score, counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, evaluate, esperance, all_actions, counter)
             scores.append(score*clone_board.proba)
         if len(scores) > 1:
             #print('calculated several clone_boards :', scores, sum([clone_board.proba for clone_board in clone_boards]))
@@ -24,7 +24,7 @@ def f(args):
         score = sum(scores)
     else:
         clone_board = clone_and_apply_actions(board, [action], playing_race, False)
-        _, score, counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, counter)
+        _, score, counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, evaluate, esperance, all_actions, counter)
 
     #_, score, total_counter = _min_max(False, clone_board, race, race_ennemi, depth - 1, esperance, all_actions, 0)
     #player.set_best_move(action, score)
@@ -60,7 +60,7 @@ class MapPlayer(SmartPlayer):
 
         args = []
         for action in actions:
-            args.append((action, board, self.race, self.race_ennemi, self.depth, self.esperance, all_actions))
+            args.append((action, board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, all_actions))
 
         from multiprocessing import Pool
         #from pathos.multiprocessing import ProcessingPool as Pool

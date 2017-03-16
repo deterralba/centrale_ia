@@ -9,14 +9,17 @@ from game import INF
 
 class SmartPlayer(Player):
 
-    def __init__(self, race, depth=3, esperance=False):
+    def __init__(self, race, depth=3, esperance=False, evaluate=None):
+        assert evaluate is not None
+
         super(SmartPlayer, self).__init__(race)
         self.depth = depth
         self.esperance = esperance
         self.transposition_table = {'depth': depth}
+        self.evaluate = evaluate
 
     def get_next_move(self, board):
-        return minimax(board, self.race, self.race_ennemi, self.depth, self.esperance, self.transposition_table)
+        return minimax(board, self.race, self.race_ennemi, self.depth, self.evaluate, self.esperance, self.transposition_table)
 
 
 class ThreadMMPlayer(Player):

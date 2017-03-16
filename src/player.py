@@ -1,5 +1,5 @@
 from random import randint
-from const import RACE_ID, HUM, WOLV, VAMP
+from const import RACE_ID, WOLV, VAMP
 from board import Action
 
 
@@ -9,6 +9,9 @@ class Player(object):
         self.race_ennemi = WOLV if self.race == VAMP else VAMP
 
     def get_next_move(self, board):
+        raise NotImplementedError()
+
+    def evaluate(*args, **kwargs):
         raise NotImplementedError()
 
 
