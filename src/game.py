@@ -32,7 +32,7 @@ def generate_play(player1, player2, board, draw=lambda x: None):
 if __name__ == '__main__':
     from time import sleep, time
     from player import RandomPlayer
-    from minmax_player import SmartPlayer, ThreadMMPlayer
+    from minmax_player import SmartPlayer, ThreadMMPlayer, SmartPlayerAlpha
     from minmax_player_map import MapPlayer
     from const import HUM, WOLV, VAMP, simple_pop_size, simple_pop, real_pop, real_pop_size
     from board import Board
@@ -49,8 +49,8 @@ if __name__ == '__main__':
     board = Board(size, initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-
-    player1 = SmartPlayer(VAMP, depth=2, esperance=False, evaluate=evaluate_inf)
+    #player1 = SmartPlayer(VAMP, depth=2, esperance=False, evaluate=evaluate_inf)
+    player1 = SmartPlayerAlpha(VAMP, depth=2, esperance=False, evaluate=evaluate_inf)
 
     #player2 = MapPlayer(WOLV, depth=5, esperance=True)
     player2 = SmartPlayer(WOLV, depth=2, esperance=False, evaluate=evaluate_disp)

@@ -1,4 +1,4 @@
-from algo_mini_max import evaluate, get_available_moves, clone_and_apply_actions, from_numpy_to_tuple
+from algo_mini_max import get_available_moves, clone_and_apply_actions, from_numpy_to_tuple
 import numpy as np
 from time import time, sleep
 from const import RACE_ID, HUM, WOLV, VAMP
@@ -6,8 +6,11 @@ from board import Action, Board
 from threading import RLock
 from game import TRANSPOSITION, INF
 
+PRINT_SUMMARY = True
+VICTORY_IS_INF = True
 
-def alphabeta(board, race, race_ennemi, depth, transposition_table=None):
+
+def alphabeta(board, race, race_ennemi, depth, evaluate, esperance, transposition_table=None):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
@@ -21,23 +24,20 @@ def alphabeta(board, race, race_ennemi, depth, transposition_table=None):
     beta = INF
 
     all_actions = []
-    best_action, best_score, total_counter = _alpha_beta(True, board, race, race_ennemi, depth, all_actions,
-                                                         counter, alpha, beta, transposition_table)
+    best_action, best_score, total_counter = _alpha_beta(
+        True, board, race, race_ennemi, depth, evaluate, esperance, all_actions, counter, alpha, beta, transposition_table
+    )
 
     print('=' * 40)
     print('action {}, score {}'.format(best_action, best_score))
 
     Board.SKIP_CHECKS = old_skip
 
-    if True:
+    if PRINT_SUMMARY:
         print('Action summary')
-        # all_actions.append((best_action, depth, best_score))
-
-        # print('before filter', all_actions)
-        print(best_score)
+        all_actions.append((best_action, depth, best_score))
         all_actions = [action for action in all_actions if action[2] == best_score]
         all_actions.sort(key=lambda x: x[1], reverse=True)
-        # print('after filter')
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
@@ -45,11 +45,14 @@ def alphabeta(board, race, race_ennemi, depth, transposition_table=None):
     return [best_action]  # return a list with only one move for the moment
 
 
-def _alpha_beta(is_max, board, race, race_ennemi, depth, all_actions, counter, alpha, beta, transposition_table=None):
+def _alpha_beta(is_max, board, race, race_ennemi, depth, evaluate, esperance, all_actions, counter, alpha, beta, transposition_table=None):
     winning_race = board.is_over()
     if winning_race:
-        score = INF if winning_race == race else -INF
-        return None, score, counter + 1
+        if VICTORY_IS_INF:
+            score = INF if winning_race == race else -INF
+            return None, score, counter + 1
+        else:
+            return None, 2 * evaluate(board, race, race_ennemi), counter + 1
     if depth == 0:
         return None, evaluate(board, race, race_ennemi), counter + 1
 
@@ -67,8 +70,8 @@ def _alpha_beta(is_max, board, race, race_ennemi, depth, all_actions, counter, a
                 score = transposition_table[clone_grid]
                 skip_alpha_beta = True
         if not skip_alpha_beta:
-            _, score, counter = _alpha_beta(not is_max, clone_board, race, race_ennemi, depth - 1, all_actions, counter,
-                                            alpha, beta, transposition_table)
+            _, score, counter = _alpha_beta(not is_max, clone_board, race, race_ennemi, depth - 1, evaluate, esperance,
+                                            all_actions, counter, alpha, beta, transposition_table)
             if TRANSPOSITION:
                 if depth == transposition_table['depth']:
                     transposition_table[clone_grid] = score
