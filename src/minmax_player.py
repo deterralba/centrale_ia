@@ -37,10 +37,10 @@ class SmartPlayer(Player):
 
     @staticmethod
     def run(actions_container, should_continue_container, board, race, race_ennemi, depth, evaluate, esperance):
-        actions = minimax(board, race, race_ennemi, depth, evaluate, esperance)
+        actions, score = minimax(board, race, race_ennemi, depth, evaluate, esperance, with_score=True)
         if should_continue_container.get():
-            print('\nsetting action {} for depth {}'.format(actions, depth))
-            actions_container.set(actions)
+            print('\nsetting action {} for depth {} and score {}'.format(actions, depth, score))
+            actions_container.smart_set(actions, depth, score)
 
 
 class SmartPlayerAlpha(SmartPlayer):
@@ -49,8 +49,10 @@ class SmartPlayerAlpha(SmartPlayer):
 
     @staticmethod
     def run(actions_container, should_continue_container, board, race, race_ennemi, depth, evaluate, esperance):
-        actions = alphabeta(board, race, race_ennemi, depth, evaluate, esperance)
-        actions_container.set(actions)
+        actions, score = alphabeta(board, race, race_ennemi, depth, evaluate, esperance, with_score=True)
+        if should_continue_container.get():
+            print('\nsetting action {} for depth {} and score {}'.format(actions, depth, score))
+            actions_container.smart_set(actions, depth, score)
 
 
 class ThreadMMPlayer(Player):

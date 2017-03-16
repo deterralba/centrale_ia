@@ -6,11 +6,11 @@ from board import Action, Board
 from threading import RLock
 from game import TRANSPOSITION, INF
 
-PRINT_SUMMARY = True
+PRINT_SUMMARY = False
 VICTORY_IS_INF = True
 
 
-def alphabeta(board, race, race_ennemi, depth, evaluate, esperance, transposition_table=None):
+def alphabeta(board, race, race_ennemi, depth, evaluate, esperance, transposition_table=None, with_score=False):
     '''without group division and only one action'''
     old_skip = Board.SKIP_CHECKS
     Board.SKIP_CHECKS = True
@@ -41,6 +41,8 @@ def alphabeta(board, race, race_ennemi, depth, evaluate, esperance, transpositio
 
     end_time = time() - start_time
     #print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_counter, end_time, total_counter / end_time))
+    if with_score:
+        return [best_action], best_score
     return [best_action]  # return a list with only one move for the moment
 
 

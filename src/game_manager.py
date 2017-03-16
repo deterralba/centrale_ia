@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #player1 = MapPlayer(race, depth=3)
     #player1 = SmartPlayerAlpha(VAMP, depth=7, esperance=True, evaluate=evaluate_inf)
     #player1 = RandomPlayer(race)
-    player1 = SmartPlayerAlpha(VAMP, depth=3, esperance=True, evaluate=evaluate_inf)
+    player1 = SmartPlayer(VAMP, depth=3, esperance=False, evaluate=evaluate_inf)
 
     while True:
         msg = com.listen()
@@ -56,7 +56,7 @@ if __name__ == '__main__':
             actions_container = ContainerList()
             player1.start_search(board, actions_container)
 
-            sleep(1.5)
+            sleep(1.2)
             while time() - start_time < time_to_play * stop:
                 sleep(0.05)
 
