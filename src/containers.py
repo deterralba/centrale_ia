@@ -25,5 +25,4 @@ class ContainerBool:
             self._bool = _bool
 
     def get(self):
-        with self._lock:
-            return self._bool
+        return self._bool
