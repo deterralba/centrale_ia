@@ -2,12 +2,12 @@ from client import ComServer
 from board import Board
 from minmax_player_map import MapPlayer
 from player import RandomPlayer
-from const import HUM, WOLV, VAMP
 from time import sleep, time
 from containers import ContainerList
 from minmax_player import SmartPlayer, SmartPlayerAlpha
 from const import HUM, WOLV, VAMP, simple_pop_size, simple_pop, real_pop, real_pop_size
 from evaluation import evaluate_inf, evaluate_disp, evaluate_fred
+
 
 
 name = 'JACK'
@@ -41,9 +41,9 @@ if __name__ == '__main__':
         race = WOLV
 
     #player1 = MapPlayer(race, depth=3)
-    player1 = SmartPlayer(VAMP, depth=4, esperance=True, evaluate=evaluate_inf)
     #player1 = SmartPlayerAlpha(VAMP, depth=7, esperance=True, evaluate=evaluate_inf)
     #player1 = RandomPlayer(race)
+    player1 = SmartPlayerAlpha(VAMP, depth=3, esperance=True, evaluate=evaluate_inf)
 
     while True:
         msg = com.listen()
