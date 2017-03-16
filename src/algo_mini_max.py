@@ -140,14 +140,17 @@ def get_available_moves(board, race):
     '''return a list of possible actions'''
     actions = []
     possibles_to = []
-    for square in board.enumerate_squares():
-        units = board.grid[square][RACE_ID[race]]
-        if units > 0:
-            possibles_to = [
+    if race == WOLV:
+        population = board.get_wolves()
+    else:
+        population = board.get_vampires()
+    for square in population.keys():
+        units = population[square]
+        possibles_to = [
                 (square[0] + i, square[1] + j) for i in range(-1, 2) for j in range(-1, 2)
                 if (i != 0 or j != 0) and Action.square_is_on_grid((square[0] + i, square[1] + j), board.grid)
-            ]
-            actions.extend([Action(square, to, units, race) for to in possibles_to])
+        ]
+        actions.extend([Action(square, to, units, race) for to in possibles_to])
     return actions
 
 

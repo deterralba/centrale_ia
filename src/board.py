@@ -4,7 +4,7 @@ from const import RACE_ID, HUM, WOLV, VAMP
 
 from game import RANDOM_MATCH_OUTPUT
 
-activate_pop = False
+activate_pop = True
 
 class ActionInvalidError(Exception):
     pass
@@ -66,7 +66,7 @@ class Board:
                     self.pop[(y, x)] = (VAMP, vampires)
                 elif wolves > 0:
                     self.pop[(y, x)] = (WOLV, wolves)
-                else:
+                elif (y, x) in self.pop.keys():
                     del self.pop[(y, x)]
 
     def get_humans(self):
@@ -87,6 +87,17 @@ class Board:
         else:
             print(self.grid)
             raise ActionInvalidError('action not valid: {}'.format(action))
+
+    def calc_update(self, changed_squares):
+        update = []
+        for square in changed_squares:
+            x = square[1]
+            y = square[0]
+            hum = self.grid[y, x, RACE_ID[HUM]]
+            vamp = self.grid[y, x, RACE_ID[VAMP]]
+            wolv = self.grid[y, x, RACE_ID[WOLV]]
+            update.append({'x': x, 'y': y, HUM: hum, VAMP: vamp, WOLV: wolv})
+        return update
 
     def do_actions(self, actions, simulation):
         self.proba = 1
@@ -111,10 +122,15 @@ class Board:
             for square in changed_squares:
                 outcomes = get_outcomes(self, square)  # returns a list of results, proba : {'result':[0,2,0], 'proba':p}
                 boards = resolve_square_with_proba(boards, outcomes, square)  # applies to squares and duplicates boards if needed
+            if activate_pop:
+                for board in boards:
+                    board.update_grid(self.calc_update(changed_squares))
             return boards
         else:
             for square in changed_squares:
                 resolve_square(self, square)
+            if activate_pop:
+                self.update_grid(self.calc_update(changed_squares))
             return self
 
 
