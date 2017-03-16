@@ -41,7 +41,7 @@ def alphabeta(board, race, race_ennemi, depth, evaluate, esperance, transpositio
         print('\n'.join(map(str, all_actions)))
 
     end_time = time() - start_time
-    print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_counter, end_time, total_counter / end_time))
+    #print('#position calc: {}, in {:.2f}s ({:.0f}/s)'.format(total_counter, end_time, total_counter / end_time))
     return [best_action]  # return a list with only one move for the moment
 
 

@@ -4,6 +4,8 @@ from minmax_player_map import MapPlayer
 from player import RandomPlayer
 from const import HUM, WOLV, VAMP
 from time import sleep
+from evaluation import evaluate_inf, evaluate_disp, evaluate_fred
+from minmax_player import SmartPlayer, ThreadMMPlayer, SmartPlayerAlpha
 
 if __name__ == '__main__':
     #Parameters
@@ -36,8 +38,9 @@ if __name__ == '__main__':
     else:
         race = WOLV
 
-    player1 = MapPlayer(race, depth=3)
+    #player1 = MapPlayer(race, depth=3)
     #player1 = RandomPlayer(race)
+    player1 = SmartPlayerAlpha(VAMP, depth=3, esperance=True, evaluate=evaluate_inf)
 
     while True:
         msg = com.listen()
@@ -49,7 +52,6 @@ if __name__ == '__main__':
             actions = [action.format() for action in actions]
             print(actions)
             com.send_mov(actions)
-            sleep(2)
         elif msg == 'END':
             print('end of the game')
             com.close_connexion()
