@@ -4,6 +4,7 @@ from const import RACE_ID, HUM, WOLV, VAMP
 
 from game import RANDOM_MATCH_OUTPUT
 
+activate_pop = False
 
 class ActionInvalidError(Exception):
     pass
@@ -13,6 +14,7 @@ class Board:
     SKIP_CHECKS = False
 
     def __init__(self, dimensions, initial_pop=None, grid=None):
+        self.pop = {}
         shape = (dimensions[0], dimensions[1], 3)
         if grid is not None:
             self.grid = grid
@@ -49,10 +51,32 @@ class Board:
         for square in changed_squares:
             x = square['x']
             y = square['y']
+            humans = square[HUM]
+            vampires = square[VAMP]
+            wolves = square[WOLV]
             # x, y server representation is not equal to our line column matrix model
-            self.grid[y, x, RACE_ID[HUM]] = square[HUM]
-            self.grid[y, x, RACE_ID[VAMP]] = square[VAMP]
-            self.grid[y, x, RACE_ID[WOLV]] = square[WOLV]
+            self.grid[y, x, RACE_ID[HUM]] = humans
+            self.grid[y, x, RACE_ID[VAMP]] = vampires
+            self.grid[y, x, RACE_ID[WOLV]] = wolves
+
+            if activate_pop:
+                if humans > 0:
+                    self.pop[(y, x)] = (HUM, humans)
+                elif vampires > 0:
+                    self.pop[(y, x)] = (VAMP, vampires)
+                elif wolves > 0:
+                    self.pop[(y, x)] = (WOLV, wolves)
+                else:
+                    del self.pop[(y, x)]
+
+    def get_humans(self):
+        return {new_key: self.pop[new_key][1] for new_key in self.pop.keys() if self.pop[new_key][0] == HUM}
+
+    def get_vampires(self):
+        return {new_key: self.pop[new_key][1] for new_key in self.pop.keys() if self.pop[new_key][0] == VAMP}
+
+    def get_wolves(self):
+        return {new_key: self.pop[new_key][1] for new_key in self.pop.keys() if self.pop[new_key][0] == WOLV}
 
     def moves(self, action):
         ''' Moves the units, does not resolve any fight'''
