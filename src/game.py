@@ -7,6 +7,7 @@ INF = 10e9
 
 def generate_play(player1, player2, board, draw=lambda x: None):
     def play(*args):
+        global WAIT
         initial_start_time = time()
         current_player = player1
         while not board.is_over():
@@ -17,11 +18,12 @@ def generate_play(player1, player2, board, draw=lambda x: None):
                 print('player {} timeout and looses!'.format(current_player))
                 # break # FIXME
             print('action of {} are {}'.format(board.current_player, actions))
-            board.do_actions(actions)
+            board.do_actions(actions, False)
             draw(board.grid)
             # sleep(0.2)
             current_player = player2 if current_player == player1 else player1
-            #input('waiting')
+            if WAIT:
+                input('waiting')
         print(board.is_over() + ' won!')
         print('lasted {:.2f}s'.format(time() - initial_start_time))
     return play
@@ -30,64 +32,38 @@ def generate_play(player1, player2, board, draw=lambda x: None):
 if __name__ == '__main__':
     from time import sleep, time
     from player import RandomPlayer
-    from minmax_player import SmartPlayer, ThreadMMPlayer, SmartPlayerAlpha
+    from minmax_player import SmartPlayer, ThreadMMPlayer
     from minmax_player_map import MapPlayer
-    from const import HUM, WOLV, VAMP
+    from const import HUM, WOLV, VAMP, simple_pop_size, simple_pop, real_pop, real_pop_size
     from board import Board
+    from evaluation import evaluate_inf, evaluate_disp, evaluate_fred
 
-    initial_pop = [{'x': 0, 'y': 0, HUM: 0, VAMP: 4, WOLV: 0},
-                   {'x': 1, 'y': 3, HUM: 5, VAMP: 0, WOLV: 0},
-                   {'x': 3, 'y': 3, HUM: 0, VAMP: 0, WOLV: 1},
-                   {'x': 3, 'y': 1, HUM: 3, VAMP: 0, WOLV: 0},
-                   {'x': 4, 'y': 3, HUM: 0, VAMP: 0, WOLV: 3}]
+    import sys
+    global WAIT
+    WAIT = False
+    if 'wait' in sys.argv:
+        WAIT = True
 
-    initial_pop2 = [{'x': 0, 'y': 0, HUM: 0, VAMP: 0, WOLV: 5},
-                    {'x': 1, 'y': 1, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 1, 'y': 3, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 2, 'y': 2, HUM: 9, VAMP: 0, WOLV: 0},
-                    {'x': 1, 'y': 1, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 3, 'y': 1, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 3, 'y': 3, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 3, 'y': 5, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 4, 'y': 5, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 5, 'y': 3, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 5, 'y': 4, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 5, 'y': 6, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 5, 'y': 7, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 6, 'y': 1, HUM: 5, VAMP: 0, WOLV: 0},
-                    {'x': 6, 'y': 5, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 7, 'y': 3, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 7, 'y': 5, HUM: 2, VAMP: 0, WOLV: 0},
-                    {'x': 7, 'y': 7, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 7, 'y': 9, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 8, 'y': 2, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 8, 'y': 8, HUM: 9, VAMP: 0, WOLV: 0},
-                    {'x': 9, 'y': 1, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 9, 'y': 4, HUM: 5, VAMP: 0, WOLV: 0},
-                    {'x': 9, 'y': 7, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 9, 'y': 9, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 10, 'y': 0, HUM: 1, VAMP: 0, WOLV: 0},
-                    {'x': 10, 'y': 10, HUM: 0, VAMP: 5, WOLV: 0},
-                    ]
-
-    board = Board((4, 5), initial_pop)
-    board2 = Board((11, 11), initial_pop2)
+    size = real_pop_size
+    initial_pop = real_pop
+    board = Board(size, initial_pop)
 
     #player1 = MapPlayer(VAMP, depth=5)
-    #player1 = MapPlayer(VAMP, depth=7, type='alphabeta')
-    player1 = SmartPlayerAlpha(VAMP, depth=3)
 
-    #player2 = MapPlayer(WOLV, depth=5)
-    #player2 = MapPlayer(WOLV, depth=7, type='alphabeta')
-    player2 = SmartPlayerAlpha(WOLV, depth=3)
+    player1 = SmartPlayer(VAMP, depth=2, esperance=False, evaluate=evaluate_inf)
+
+    #player2 = MapPlayer(WOLV, depth=5, esperance=True)
+    player2 = SmartPlayer(WOLV, depth=2, esperance=False, evaluate=evaluate_disp)
+
     #player2 = RandomPlayer(WOLV)
 
     GUI = True
     if GUI:
         from draw import start_GUI, draw
-        start_GUI(board2.grid, generate_play(player1, player2, board2, draw))
+        start_GUI(board.grid, generate_play(player1, player2, board, draw))
     else:
-        play = generate_play(player1, player2, board2)
+        play = generate_play(player1, player2, board)
         play()
+
         #import cProfile
         # cProfile.run('play()')
