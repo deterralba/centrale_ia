@@ -11,8 +11,8 @@ from evaluation import evaluate_inf, evaluate_disp, evaluate_fred
 
 
 name = 'JACK'
-time_to_play = 2
-stop = 0.95  # proportion du time_to_play auquel on arrête
+time_to_play = 3
+stop = 0.8  # proportion du time_to_play auquel on arrête
 
 # Parameters
 host = 'localhost'
@@ -20,6 +20,12 @@ port = 5555
 
 
 if __name__ == '__main__':
+
+    import sys
+    # Parameters
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+    
     # Start communication with the server
     com = ComServer(host, port)
     com.connect_with_server()
@@ -43,7 +49,7 @@ if __name__ == '__main__':
     #player1 = MapPlayer(race, depth=3)
     #player1 = SmartPlayerAlpha(VAMP, depth=7, esperance=True, evaluate=evaluate_inf)
     #player1 = RandomPlayer(race)
-    player1 = SmartPlayer(VAMP, depth=4, esperance=False, evaluate=evaluate_fred)
+    
 
     while True:
         msg = com.listen()
@@ -54,9 +60,17 @@ if __name__ == '__main__':
             board.update_grid(upd)
 
             actions_container = ContainerList()
+            
+            if board.grid.size < 5000:
+                print('fred')
+                evaluate = evaluate_fred
+            else:
+                print('inf')
+                evaluate = evaluate_inf
+            player1 = SmartPlayerAlpha(race, depth=4, esperance=False, evaluate=evaluate)  # change me
             player1.start_search(board, actions_container)
 
-            sleep(1.2)
+            sleep(0.5)
             while time() - start_time < time_to_play * stop:
                 sleep(0.05)
 

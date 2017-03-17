@@ -8,6 +8,7 @@ from time import time
 from game import INF
 from threading import Thread
 from containers import ContainerBool
+from evaluation import evaluate_inf, evaluate_disp, evaluate_fred
 
 
 class SmartPlayer(Player):
